@@ -1,0 +1,39 @@
+<h2>Vytvořit nový typ člena</h2>
+
+<form (ngSubmit)="submit()">
+  <label>
+    Název typu:
+    <input type="text" [(ngModel)]="name" name="name" required />
+  </label>
+
+  <h3>Atributy</h3>
+  @for (attr of attributes; let i = $index; track i;) {
+    <div>
+      <input
+        type="text"
+        [(ngModel)]="attr.name"
+        [name]="'attr-name-' + i"
+        placeholder="Název atributu"
+        required
+      />
+
+      <select
+        [(ngModel)]="attr.type"
+        [name]="'attr-type-' + i"
+        required
+      >
+        <option value="text">Text</option>
+        <option value="number">Číslo</option>
+        <option value="date">Datum</option>
+        <option value="boolean">Checkbox</option>
+      </select>
+
+      <button type="button" (click)="removeAttribute(i)">❌</button>
+    </div>
+  }
+
+  <button type="button" (click)="addAttribute()">➕ Přidat atribut</button>
+
+  <br /><br />
+  <button type="submit">💾 Uložit typ člena</button>
+</form>

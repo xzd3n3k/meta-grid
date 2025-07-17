@@ -1,0 +1,58 @@
+<h2>Přidat člena</h2>
+
+<label>
+  Vyber typ člena:
+  <select [(ngModel)]="selectedTypeId" (change)="onTypeChange()">
+    <option [value]="''" disabled>-- Vyber --</option>
+
+    @for (memberType of memberTypes; track memberType.id) {
+      <option [value]="memberType.id">{{ memberType.name }}</option>
+    }
+
+  </select>
+</label>
+
+@if (selectedType) {
+  <form (ngSubmit)="submit()">
+
+    @for (attr of selectedType.attributes; track $index) {
+      <div>
+        <label>
+          {{ attr.name }}:
+          @if (attr.type === 'text') {
+            <input
+              type="text"
+              [(ngModel)]="formData[attr.name]"
+              [name]="attr.name"
+              required
+            />
+          } @else if (attr.type === 'number') {
+            <input
+              type="number"
+              [(ngModel)]="formData[attr.name]"
+              [name]="attr.name"
+              required
+            />
+          } @else if (attr.type === 'date') {
+            <input
+              type="date"
+              [(ngModel)]="formData[attr.name]"
+              [name]="attr.name"
+              required
+            />
+          } @else if (attr.type === 'boolean') {
+            <input
+              type="checkbox"
+              [(ngModel)]="formData[attr.name]"
+              [name]="attr.name"
+              required
+            />
+          }
+        </label>
+      </div>
+    }
+
+    <br />
+    <button type="submit">💾 Uložit člena</button>
+  </form>
+}

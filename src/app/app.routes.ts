@@ -1,3 +1,18 @@
 import { Routes } from '@angular/router';
+import {AuthForm} from './components/auth-form/auth-form';
+import {MemberTypeForm} from './components/member-type-form/member-type-form';
+import {AuthGuard} from '@angular/fire/auth-guard';
+import {Logout} from './components/logout/logout';
+import {Home} from './components/home/home';
+import {authGuard} from './shared/auth.guard';
+import {MemberTypeTable} from './components/member-type-table/member-type-table';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  { path: 'login', component: AuthForm },
+  { path: 'logout', component: Logout },
+  { path: 'novy-typ-clena', component: MemberTypeForm, canActivate: [AuthGuard] },
+  { path: 'spravovat-typy-clenu', component: MemberTypeTable, canActivate: [AuthGuard] },
+  { path: 'domu', component: Home, canActivate: [AuthGuard] },
+  { path: '', redirectTo: 'novy-typ-clena', pathMatch: 'full' },
+  { path: '**', redirectTo: 'novy-typ-clena' },
+];

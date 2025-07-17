@@ -1,0 +1,29 @@
+<h2>Seznam typů členů</h2>
+
+@if (memberTypes.length > 0) {
+  <table>
+    <thead>
+    <tr>
+      <th>Název</th>
+      <th>Akce</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (memberType of memberTypes; track memberType.id) {
+        <tr>
+          <td>
+            {{memberType.name}}
+          </td>
+          <td>
+            <button (click)="editMemberType(memberType)">✏️ Upravit</button>
+            <button (click)="deleteMemberType(memberType.id)">🗑️ Smazat</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (memberTypes.length === 0) {
+  <p>Žádné typy členů.</p>
+}

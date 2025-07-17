@@ -1,0 +1,10 @@
+<button (click)="addMember()">pridat clena</button>
+<button (click)="addMemberType()">pridat typ clena</button>
+<button (click)="manageMemberTypes()">spravovat typy clenu</button>
+<button (click)="logout()">odhlasit se</button>
+
+@if (showMemberForm()) {
+  <app-member-form></app-member-form>
+}
+
+<app-member-table></app-member-table>

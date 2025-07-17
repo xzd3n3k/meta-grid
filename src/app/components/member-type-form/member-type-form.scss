@@ -1,0 +1,12 @@
+form {
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+input, select {
+  width: 100%;
+}
+h3 {
+  margin-top: 1rem;
+}

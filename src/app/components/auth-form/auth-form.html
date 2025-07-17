@@ -1,0 +1,28 @@
+<div class="auth-container">
+  <h2>{{ isLoginMode ? 'Přihlásit se' : 'Registrovat se' }}</h2>
+
+  <form (ngSubmit)="onSubmit()">
+    <label>
+      Email:
+      <input type="email" [(ngModel)]="email" name="email" required />
+    </label>
+    <label>
+      Heslo:
+      <input type="password" [(ngModel)]="password" name="password" required />
+    </label>
+
+    <button type="submit">{{ isLoginMode ? 'Přihlásit' : 'Registrovat' }}</button>
+  </form>
+
+  <!--      <p>-->
+  <!--        <a (click)="toggleMode()">-->
+  <!--          {{ isLoginMode ? 'Nemáš účet? Zaregistruj se!' : 'Už máš účet? Přihlas se!' }}-->
+  <!--        </a>-->
+  <!--      </p>-->
+
+  @if (errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+</div>
