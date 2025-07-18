@@ -15,7 +15,7 @@
             {{memberType.name}}
           </td>
           <td>
-            <button (click)="editMemberType(memberType)">✏️ Upravit</button>
+            <button (click)="editMemberType(memberType, dialog)">✏️ Upravit</button>
             <button (click)="deleteMemberType(memberType.id)">🗑️ Smazat</button>
           </td>
         </tr>
@@ -27,3 +27,7 @@
 @if (memberTypes.length === 0) {
   <p>Žádné typy členů.</p>
 }
+
+<app-dialog #dialog>
+  <app-member-type-form [memberType]="memberType()" (submittedSuccessfully)="closeDialog(dialog)"></app-member-type-form>
+</app-dialog>

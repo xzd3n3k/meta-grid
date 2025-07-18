@@ -1,12 +1,16 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MemberType, MemberTypeService} from '../../shared/member-type.service';
 import {MemberService} from '../../shared/member.service';
+import {Dialog} from '../dialog/dialog';
+import {MemberTypeForm} from '../member-type-form/member-type-form';
 
 @Component({
   selector: 'app-member-type-table',
   imports: [
     FormsModule,
+    Dialog,
+    MemberTypeForm,
   ],
   templateUrl: './member-type-table.html',
   styleUrl: './member-type-table.scss'
@@ -14,6 +18,8 @@ import {MemberService} from '../../shared/member.service';
 export class MemberTypeTable implements OnInit {
   private memberTypeService = inject(MemberTypeService);
   private memberService = inject(MemberService);
+
+  protected memberType = signal<MemberType | null | undefined>(null);
 
   protected memberTypes: MemberType[] = [];
 
@@ -23,8 +29,9 @@ export class MemberTypeTable implements OnInit {
     });
   }
 
-  protected editMemberType(memberType: MemberType) {
-    // TODO open dialog with edit form
+  protected editMemberType(memberType: MemberType, dialog: Dialog) {
+    this.memberType.set(memberType);
+    dialog.open();
     return;
   }
 
@@ -36,4 +43,9 @@ export class MemberTypeTable implements OnInit {
       });
     }
   }
+
+  protected closeDialog(dialog: Dialog) {
+    dialog.close();
+  }
+
 }
