@@ -41,7 +41,7 @@ export class MemberForm implements OnInit {
     }
   }
 
-  submit() {
+  protected submit() {
     if (!this.selectedTypeId || !this.selectedType) return;
 
     this.memberService.create({

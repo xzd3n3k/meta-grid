@@ -38,7 +38,7 @@ export class MemberTypeForm {
     this.attributes.splice(index, 1);
   }
 
-  submit() {
+  protected submit() {
     if (!this.name || this.attributes.some(attr => !attr.name || !attr.type)) {
       alert('Vyplň název a všechny atributy!');
       return;

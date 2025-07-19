@@ -16,30 +16,13 @@ export class MemberTable implements OnInit {
   private memberTypeService = inject(MemberTypeService);
   private memberService = inject(MemberService);
 
-  memberTypes: MemberType[] = [];
-  selectedTypeId = '';
-  selectedType: MemberType | null = null;
-  members: any[] = [];
+  protected memberTypes: MemberType[] = [];
+  protected selectedTypeId = '';
+  protected selectedType: MemberType | null = null;
+  protected members: any[] = [];
 
-  editId: string | null = null;
-  editableMember: Record<string, any> = {};
-
-  editMember(member: any) {
-    this.editId = member.id;
-    this.editableMember = {...member.data};
-  }
-
-  cancelEdit() {
-    this.editId = null;
-    this.editableMember = {};
-  }
-
-  saveEdit(id: string) {
-    this.memberService.update(id, this.editableMember).subscribe(() => {
-      this.members.find(m => m.id === id).data = this.editableMember;
-      this.cancelEdit();
-    });
-  }
+  protected editId: string | null = null;
+  protected editableMember: Record<string, any> = {};
 
   ngOnInit() {
     this.memberTypeService.getAll().subscribe(types => {
@@ -47,7 +30,7 @@ export class MemberTable implements OnInit {
     });
   }
 
-  onTypeChange() {
+  protected onTypeChange() {
     this.selectedType = this.memberTypes.find(t => t.id === this.selectedTypeId) || null;
     this.members = [];
 
@@ -58,7 +41,24 @@ export class MemberTable implements OnInit {
     }
   }
 
-  deleteMember(id: string) {
+  protected editMember(member: any) {
+    this.editId = member.id;
+    this.editableMember = {...member.data};
+  }
+
+  protected cancelEdit() {
+    this.editId = null;
+    this.editableMember = {};
+  }
+
+  protected saveEdit(id: string) {
+    this.memberService.update(id, this.editableMember).subscribe(() => {
+      this.members.find(m => m.id === id).data = this.editableMember;
+      this.cancelEdit();
+    });
+  }
+
+  protected deleteMember(id: string) {
     if (confirm('Opravdu chcete smazat tohoto člena?')) {
       this.memberService.delete(id).subscribe(() => {
         this.members = this.members.filter(m => m.id !== id);
@@ -66,7 +66,7 @@ export class MemberTable implements OnInit {
     }
   }
 
-  exportToPdf() {
+  protected exportToPdf() {
     const doc = new jsPDF();
     const columns = this.selectedType!.attributes.map(attr => attr.name);
     const rows = this.members.map(member =>

@@ -16,20 +16,20 @@ export class Dialog {
 
   protected readonly opened = signal(false);
 
-  onBackdropClick(event: MouseEvent) {
-    if (this.closable() && (event.target as HTMLElement).classList.contains('dialog-backdrop')) {
-      this.close();
-    }
-  }
-
-  open() {
+  public open() {
     this.opened.set(true);
   }
 
-  close() {
+  public close() {
     if (this.closable()) {
       this.opened.set(false);
       this.closed.emit();
+    }
+  }
+
+  protected onBackdropClick(event: MouseEvent) {
+    if (this.closable() && (event.target as HTMLElement).classList.contains('dialog-backdrop')) {
+      this.close();
     }
   }
 }
