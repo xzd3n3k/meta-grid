@@ -5,7 +5,7 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 
 @Component({
-  selector: 'app-home',
+  selector: 'hxt-home',
   imports: [
     MemberForm,
     MemberTable,

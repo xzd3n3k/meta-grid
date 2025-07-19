@@ -6,7 +6,7 @@ import {MemberService} from '../../shared/member.service';
 
 
 @Component({
-  selector: 'app-member-form',
+  selector: 'hxt-member-form',
   imports: [CommonModule, FormsModule],
   templateUrl: './member-form.html',
 })

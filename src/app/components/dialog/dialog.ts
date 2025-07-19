@@ -1,7 +1,7 @@
 import { Component, ElementRef, input, output, signal, viewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-dialog',
+  selector: 'hxt-dialog',
   imports: [],
   templateUrl: './dialog.html',
   styleUrl: './dialog.scss'

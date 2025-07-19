@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 @Component({
-  selector: 'app-member-table',
+  selector: 'hxt-member-table',
   imports: [CommonModule, FormsModule],
   templateUrl: './member-table.html',
 })

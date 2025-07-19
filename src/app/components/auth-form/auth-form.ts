@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import {AuthService} from '../../shared/auth.service';
 
 @Component({
-  selector: 'app-auth-form',
+  selector: 'hxt-auth-form',
   imports: [CommonModule, FormsModule],
   templateUrl: './auth-form.html',
   styleUrl: './auth-form.scss',

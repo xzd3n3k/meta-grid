@@ -2,7 +2,7 @@ import {Component, inject} from '@angular/core';
 import {AuthService} from '../../shared/auth.service';
 
 @Component({
-  selector: 'app-logout',
+  selector: 'hxt-logout',
   imports: [],
   templateUrl: './logout.html',
   styleUrl: './logout.scss'

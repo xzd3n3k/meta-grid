@@ -6,7 +6,7 @@ import {Dialog} from '../dialog/dialog';
 import {MemberTypeForm} from '../member-type-form/member-type-form';
 
 @Component({
-  selector: 'app-member-type-table',
+  selector: 'hxt-member-type-table',
   imports: [
     FormsModule,
     Dialog,

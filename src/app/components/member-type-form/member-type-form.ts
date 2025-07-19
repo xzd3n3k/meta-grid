@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {MemberAttribute, MemberType, MemberTypeInit, MemberTypeService} from '../../shared/member-type.service';
 
 @Component({
-  selector: 'app-member-type-form',
+  selector: 'hxt-member-type-form',
   imports: [CommonModule, FormsModule],
   templateUrl: './member-type-form.html',
   styleUrl: './member-type-form.scss',

@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import {MemberTypeForm} from './components/member-type-form/member-type-form';
 
 @Component({
-  selector: 'app-root',
+  selector: 'hxt-root',
   imports: [RouterOutlet, MemberTypeForm],
   templateUrl: './app.html',
   styleUrl: './app.scss'
