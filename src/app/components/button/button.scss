@@ -1,0 +1,137 @@
+:host {
+  display: inline-flex;
+}
+
+.button {
+  border: 1px solid transparent;
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+
+  // severity
+  &--primary {
+    background-color: var(--color-primary);
+    color: white;
+
+    --background-color-light: var(--color-primary-100);
+    --background-color-light-secondary: var(--color-primary-200);
+    --primary-color: var(--color-primary);
+
+    &:hover {
+      background-color: var(--color-primary-400);
+    }
+
+    &:active {
+      background-color: var(--color-primary-500);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--color-secondary);
+    color: white;
+
+    --background-color-light: var(--color-secondary-100);
+    --background-color-light-secondary: var(--color-secondary-200);
+    --primary-color: var(--color-secondary);
+
+    &:hover {
+      background-color: var(--color-secondary-400);
+    }
+
+    &:active {
+      background-color: var(--color-secondary-500);
+    }
+  }
+
+  &--success {
+    background-color: var(--color-success);
+    color: white;
+
+    --background-color-light: var(--color-success-100);
+    --background-color-light-secondary: var(--color-success-200);
+    --primary-color: var(--color-success);
+
+    &:hover {
+      background-color: var(--color-success-400);
+    }
+
+    &:active {
+      background-color: var(--color-success-500);
+    }
+  }
+
+  &--danger {
+    background-color: var(--color-danger);
+    color: white;
+
+    --background-color-light: var(--color-danger-100);
+    --background-color-light-secondary: var(--color-danger-200);
+    --primary-color: var(--color-danger);
+
+    &:hover {
+      background-color: var(--color-danger-400);
+    }
+
+    &:active {
+      background-color: var(--color-danger-500);
+    }
+  }
+
+  //shape
+  &--square {
+    border-radius: 0;
+  }
+
+  &--rounded {
+    border-radius: 6px;
+  }
+
+  &--pill {
+    border-radius: 999px;
+  }
+
+  // appearance
+  &--fill {
+
+  }
+
+  &--outline {
+    background-color: transparent;
+    border-color: var(--primary-color);
+    color: #5e5e5e;
+
+    &:hover {
+      background-color: var(--background-color-light);
+    }
+
+    &:active {
+      background-color: var(--background-color-light-secondary);
+    }
+  }
+
+  &--flat {
+    background-color: transparent;
+    border-color: transparent;
+    color: #5e5e5e;
+
+    &:hover {
+      background-color: var(--background-color-light-secondary);
+      color: white;
+    }
+
+    &:active {
+      background-color: var(--primary-color);
+    }
+  }
+
+  // size
+  &--small {
+    padding: var(--button-padding-half) var(--button-padding-base);
+  }
+
+  &--medium {
+    padding: var(--button-padding-base) calc(var(--button-padding-base)*2);
+  }
+
+  &--large {
+    padding: calc(var(--button-padding-base)*2) calc(var(--button-padding-base)*4);
+  }
+}

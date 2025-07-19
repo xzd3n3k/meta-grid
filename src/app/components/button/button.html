@@ -1,0 +1,13 @@
+<button
+  class="button"
+  [disabled]="disabled()"
+  [ngClass]="[
+    'button--' + severity(),
+    'button--' + appearance(),
+    'button--' + shape(),
+    'button--' + size(),
+    ]"
+
+>
+  <ng-content></ng-content>
+</button>
