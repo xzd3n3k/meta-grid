@@ -9,6 +9,8 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
 export class Dialog {
   readonly backdrop = input(true);
   readonly closable = input(true);
+  readonly closableOnBackdropClick = input(true);
+  readonly title = input('');
 
   readonly closed = output();
 
@@ -28,7 +30,7 @@ export class Dialog {
   }
 
   protected onBackdropClick(event: MouseEvent) {
-    if (this.closable() && (event.target as HTMLElement).classList.contains('dialog-backdrop')) {
+    if (this.closableOnBackdropClick() && this.closable() && (event.target as HTMLElement).classList.contains('dialog-backdrop')) {
       this.close();
     }
   }

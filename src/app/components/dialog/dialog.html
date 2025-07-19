@@ -9,7 +9,7 @@
       (click)="$event.stopPropagation()"
     >
       <div class="dialog-header">
-        <span class="dialog-title">Dialog</span>
+        <span class="dialog-title">{{title()}}</span>
         @if (closable()) {
           <button class="close-btn" (click)="close()">×</button>
         }
