@@ -1,10 +1,15 @@
 :host {
   display: inline-flex;
+
+  &.disabled {
+    pointer-events: none;
+  }
 }
 
 .button {
   border: 1px solid transparent;
   transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+  user-select: none;
 
   // severity
   &--primary {
@@ -133,5 +138,11 @@
 
   &--large {
     padding: calc(var(--button-padding-base)*2) calc(var(--button-padding-base)*4);
+  }
+
+  // states
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
   }
 }

@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, effect, HostBinding, input} from '@angular/core';
 import {ButtonAppearance, ButtonShape, ButtonSize, ButtonSeverity} from '../../shared/button.types';
 import {NgClass} from '@angular/common';
 
@@ -8,7 +8,7 @@ import {NgClass} from '@angular/common';
     NgClass
   ],
   templateUrl: './button.html',
-  styleUrl: './button.scss'
+  styleUrl: './button.scss',
 })
 export class Button {
   readonly severity = input<ButtonSeverity>('primary');
@@ -16,4 +16,15 @@ export class Button {
   readonly shape = input<ButtonShape>('rounded');
   readonly size = input<ButtonSize>('medium');
   readonly disabled = input(false);
+
+  @HostBinding('class') hostClass = '';
+
+  private readonly setDisabledClass = effect(() => {
+    if (this.disabled()) {
+      this.hostClass = 'disabled';
+      return;
+    }
+
+    this.hostClass = '';
+  })
 }
