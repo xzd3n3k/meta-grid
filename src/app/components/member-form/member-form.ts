@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MemberType, MemberTypeService} from '../../shared/member-type.service';
 import {MemberService} from '../../shared/member.service';
+import {FormField} from '../form-field/form-field';
+import {Button} from '../button/button';
 
 
 @Component({
   selector: 'hxt-member-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FormField, Button],
   templateUrl: './member-form.html',
+  styleUrl: './member-form.scss',
 })
 export class MemberForm implements OnInit {
   private memberTypeService = inject(MemberTypeService);

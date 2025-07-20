@@ -1,0 +1,11 @@
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.button-on-the-right {
+  display: flex;
+  flex-direction: row;
+  justify-self: end;
+}
