@@ -1,0 +1,110 @@
+@use '../../../mixins.scss' as *;
+
+:host {
+  .form-field-wrapper {
+    min-height: 32px;
+    display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 8px;
+    align-items: baseline;
+    justify-content: normal;
+
+    @include tablet {
+      flex-direction: column;
+    }
+  }
+
+  .form-field-label {
+    //display: inline-block;
+    flex-grow: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: right;
+    vertical-align: middle;
+    color: var(--color-black-light);
+
+    //label {
+    //  height: 32px;
+    //  display: inline-flex !important;
+    //  position: relative;
+    //  align-items: center;
+    //  justify-content: flex-end;
+    //}
+
+    label {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: right;
+      height: 32px;
+
+      width: 100%;
+      white-space: nowrap;
+      text-align: right;
+
+      &:after {
+        content: "";
+        margin-right: 16px;
+      }
+
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+    }
+
+    @include tv {
+      display: block;
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+
+    @include desktop {
+      display: block;
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+
+    @include laptop {
+      display: block;
+      flex: 0 0 33.3333333333333%;
+      max-width: 33.3333333333333%;
+    }
+
+    @include tablet {
+      display: block;
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  .form-field-input {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    position: relative;
+    width: 100% !important;
+    min-height: 32px;
+
+    @include tv {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    @include desktop {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    @include laptop {
+      flex: 0 0 66.6666666666666%;
+      max-width: 66.6666666666666%;
+    }
+
+    @include tablet {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+}
