@@ -4,6 +4,7 @@ import {MemberType, MemberTypeService} from '../../shared/member-type.service';
 import {MemberService} from '../../shared/member.service';
 import {Dialog} from '../dialog/dialog';
 import {MemberTypeForm} from '../member-type-form/member-type-form';
+import {Button} from '../button/button';
 
 @Component({
   selector: 'hxt-member-type-table',
@@ -11,6 +12,7 @@ import {MemberTypeForm} from '../member-type-form/member-type-form';
     FormsModule,
     Dialog,
     MemberTypeForm,
+    Button,
   ],
   templateUrl: './member-type-table.html',
   styleUrl: './member-type-table.scss'

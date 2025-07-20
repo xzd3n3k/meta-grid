@@ -15,8 +15,10 @@
             {{memberType.name}}
           </td>
           <td>
-            <button (click)="editMemberType(memberType, dialog)">✏️ Upravit</button>
-            <button (click)="deleteMemberType(memberType.id)">🗑️ Smazat</button>
+            <span class="table-action-buttons">
+              <hxt-button (click)="editMemberType(memberType, dialog)">✏️ Upravit</hxt-button>
+              <hxt-button (click)="deleteMemberType(memberType.id)">🗑️ Smazat</hxt-button>
+            </span>
           </td>
         </tr>
       }
@@ -28,6 +30,6 @@
   <p>Žádné typy členů.</p>
 }
 
-<hxt-dialog #dialog>
+<hxt-dialog #dialog title="Upravit typ člena">
   <hxt-member-type-form [memberType]="memberType()" (submittedSuccessfully)="closeDialog(dialog)"></hxt-member-type-form>
 </hxt-dialog>

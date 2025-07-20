@@ -1,4 +1,6 @@
-<h2>Vytvořit nový typ člena</h2>
+@if (!memberType()) {
+  <h2>Vytvořit nový typ člena</h2>
+}
 
 <form (ngSubmit)="submit()">
   <hxt-form-field label="Název typu:">
