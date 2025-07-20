@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {AuthService} from '../../shared/auth.service';
+import {Button} from '../button/button';
 
 @Component({
   selector: 'hxt-auth-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Button],
   templateUrl: './auth-form.html',
   styleUrl: './auth-form.scss',
 })
