@@ -1,7 +1,7 @@
 <div class="auth-container">
   <h2>{{ isLoginMode ? 'Přihlásit se' : 'Registrovat se' }}</h2>
 
-  <form (ngSubmit)="onSubmit()">
+  <form (ngSubmit)="onSubmit()" class="login-fields">
     <label>
       Email:
       <input type="email" [(ngModel)]="email" name="email" required />

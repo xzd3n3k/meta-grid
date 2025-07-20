@@ -27,3 +27,9 @@ input {
   font-weight: bold;
   margin-top: 10px;
 }
+
+.login-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
