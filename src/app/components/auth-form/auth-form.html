@@ -11,7 +11,7 @@
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
 
-    <hxt-button type="submit">{{ isLoginMode ? 'Přihlásit' : 'Registrovat' }}</hxt-button>
+    <hxt-button [type]="'submit'">{{ isLoginMode ? 'Přihlásit' : 'Registrovat' }}</hxt-button>
   </form>
 
   <!--      <p>-->

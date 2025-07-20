@@ -2,10 +2,12 @@ import {Component, computed, effect, inject, input, output} from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MemberAttribute, MemberType, MemberTypeInit, MemberTypeService} from '../../shared/member-type.service';
+import {FormField} from '../form-field/form-field';
+import {Button} from '../button/button';
 
 @Component({
   selector: 'hxt-member-type-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FormField, Button],
   templateUrl: './member-type-form.html',
   styleUrl: './member-type-form.scss',
 })
