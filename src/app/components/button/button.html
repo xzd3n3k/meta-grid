@@ -1,5 +1,6 @@
 <button
   class="button"
+  [type]="type()"
   [disabled]="disabled()"
   [ngClass]="[
     'button--' + severity(),

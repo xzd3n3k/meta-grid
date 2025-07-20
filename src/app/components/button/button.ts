@@ -1,5 +1,5 @@
 import {Component, effect, HostBinding, input} from '@angular/core';
-import {ButtonAppearance, ButtonShape, ButtonSize, ButtonSeverity} from '../../shared/button.types';
+import {ButtonAppearance, ButtonShape, ButtonSize, ButtonSeverity, ButtonType} from '../../shared/button.types';
 import {NgClass} from '@angular/common';
 
 @Component({
@@ -16,6 +16,7 @@ export class Button {
   readonly shape = input<ButtonShape>('rounded');
   readonly size = input<ButtonSize>('medium');
   readonly disabled = input(false);
+  readonly type = input<ButtonType>('button')
 
   @HostBinding('class') hostClass = '';
 
