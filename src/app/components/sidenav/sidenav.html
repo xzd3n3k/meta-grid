@@ -1,0 +1,39 @@
+<nav>
+  <ul class="navbar-links">
+    <li class="logo">
+      <img src="assets/logo.svg" alt="logo" height="75" width="75">
+    </li>
+    <li>
+      <a class="nav-content" routerLink="logout">
+        <img class="ico" src="assets/logout.svg" height="40" width="70">
+        <span class="nav-item">Odhlásit se</span>
+      </a>
+    </li>
+    <li>
+      <a class="nav-content" routerLink="novy-clen">
+        <img class="ico" src="assets/userPlus.svg" height="40" width="70">
+        <span class="nav-item">Přidat člena</span>
+      </a>
+    </li>
+    <li>
+      <a class="nav-content" routerLink="novy-typ-clena">
+        <img class="ico" src="assets/plus.svg" height="40" width="70">
+        <span class="nav-item">Přidat typ člena</span>
+      </a>
+    </li>
+    <li>
+      <a class="nav-content" routerLink="spravovat-typy-clenu">
+        <img class="ico" src="assets/penToSquare.svg" height="40" width="70">
+        <span class="nav-item">Spravovat typy členů</span>
+      </a>
+    </li>
+    @for (memberType of memberTypes(); track memberType.id) {
+      <li>
+        <a class="nav-content" [routerLink]="['tabulka', memberType.id]">
+          <img class="ico" src="assets/person.svg" height="40" width="70">
+          <span class="nav-item">{{memberType.name}}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
