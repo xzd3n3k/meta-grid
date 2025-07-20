@@ -1,93 +1,84 @@
-<h2>Seznam členů podle typu</h2>
+<div class="table-wrapper">
+  @if (selectedType && members.length > 0 && !loading()) {
+    <hxt-button
+      (click)="exportToPdf(selectedType)"
+    >
+      Exportovat do PDF
+    </hxt-button>
 
-<label>
-  Vyber typ člena:
-  <select [(ngModel)]="selectedTypeId" (change)="onTypeChange()">
-    <option [value]="''" disabled>-- Vyber --</option>
-
-    @for (memberType of memberTypes; track memberType.id) {
-      <option [value]="memberType.id">{{ memberType.name }}</option>
-    }
-  </select>
-</label>
-
-@if (selectedType) {
-  <div>
-    <button (click)="exportToPdf()" [disabled]="members.length === 0">📄 Exportovat do PDF</button>
-  </div>
-}
-
-@if (selectedType && members.length > 0) {
-  <table>
-    <thead>
-    <tr>
-      @for (attr of selectedType.attributes; track $index) {
-        <th>{{ attr.name }}</th>
-      }
-      <th>Akce</th>
-    </tr>
-    </thead>
-    <tbody>
-      @for (member of members; track $index) {
-        <tr>
-          @if (editId === member.id) {
-            @for (attr of selectedType.attributes; track $index) {
+    <table>
+      <thead>
+      <tr>
+        @for (attr of selectedType.attributes; track $index) {
+          <th>{{ attr.name }}</th>
+        }
+        <th>Akce</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (member of members; track $index) {
+          <tr class="table-row">
+            @if (editId === member.id) {
+              @for (attr of selectedType.attributes; track $index) {
+                <td>
+                  @switch (attr.type) {
+                    @case ('text') {
+                      <input
+                        type="text"
+                        [(ngModel)]="editableMember[attr.name]"
+                      />
+                    }
+                    @case ('number') {
+                      <input
+                        type="number"
+                        [(ngModel)]="editableMember[attr.name]"
+                      />
+                    }
+                    @case ('date') {
+                      <input
+                        type="date"
+                        [(ngModel)]="editableMember[attr.name]"
+                      />
+                    }
+                    @case ('boolean') {
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="editableMember[attr.name]"
+                      />
+                    }
+                    @default {
+                      <input
+                        type="text"
+                        [(ngModel)]="editableMember[attr.name]"
+                      />
+                    }
+                  }
+                </td>
+              }
               <td>
-                @switch (attr.type) {
-                  @case ('text') {
-                    <input
-                      type="text"
-                      [(ngModel)]="editableMember[attr.name]"
-                    />
-                  }
-                  @case ('number') {
-                    <input
-                      type="number"
-                      [(ngModel)]="editableMember[attr.name]"
-                    />
-                  }
-                  @case ('date') {
-                    <input
-                      type="date"
-                      [(ngModel)]="editableMember[attr.name]"
-                    />
-                  }
-                  @case ('boolean') {
-                    <input
-                      type="checkbox"
-                      [(ngModel)]="editableMember[attr.name]"
-                    />
-                  }
-                  @default {
-                    <input
-                      type="text"
-                      [(ngModel)]="editableMember[attr.name]"
-                    />
-                  }
-                }
+                <hxt-button (click)="saveEdit(member.id)">💾 Uložit</hxt-button>
+                <hxt-button (click)="cancelEdit()">✖ Zrušit</hxt-button>
+              </td>
+            } @else {
+              @for (attr of selectedType.attributes; track $index) {
+                <td>
+                  {{ member.data[attr.name] }}
+                </td>
+              }
+              <td>
+                <hxt-button (click)="editMember(member)">✏️ Upravit</hxt-button>
+                <hxt-button (click)="deleteMember(member.id)">🗑️ Smazat</hxt-button>
               </td>
             }
-            <td>
-              <button (click)="saveEdit(member.id)">💾 Uložit</button>
-              <button (click)="cancelEdit()">✖ Zrušit</button>
-            </td>
-          } @else {
-            @for (attr of selectedType.attributes; track $index) {
-              <td>
-                {{ member.data[attr.name] }}
-              </td>
-            }
-            <td>
-              <button (click)="editMember(member)">✏️ Upravit</button>
-              <button (click)="deleteMember(member.id)">🗑️ Smazat</button>
-            </td>
-          }
-        </tr>
-      }
-    </tbody>
-  </table>
-}
-
-@if (selectedType && members.length === 0) {
-  <p>Žádní členové tohoto typu.</p>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  @if (members.length === 0 && !loading()) {
+    <img [src]="'assets/EmptyStateWText.svg'" class="emptyBackground" alt="empty">
+  }
+</div>
+@if (loading()) {
+  <hxt-loading-spinner></hxt-loading-spinner>
 }

@@ -1,45 +1,54 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {Component, OnInit, inject, signal, effect} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MemberService} from '../../shared/member.service';
-import {MemberType, MemberTypeService} from '../../shared/member-type.service';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {ActivatedRoute} from '@angular/router';
+import {MemberType, MemberTypeService} from '../../shared/member-type.service';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {map} from 'rxjs/operators';
+import {Button} from '../button/button';
+import {LoadingSpinner} from '../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'hxt-member-table',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Button, LoadingSpinner],
   templateUrl: './member-table.html',
+  styleUrl: './member-table.scss',
 })
-export class MemberTable implements OnInit {
+export class MemberTable {
   private memberTypeService = inject(MemberTypeService);
   private memberService = inject(MemberService);
+  private activatedRoute = inject(ActivatedRoute);
 
-  protected memberTypes: MemberType[] = [];
-  protected selectedTypeId = '';
   protected selectedType: MemberType | null = null;
   protected members: any[] = [];
 
   protected editId: string | null = null;
   protected editableMember: Record<string, any> = {};
 
-  ngOnInit() {
-    this.memberTypeService.getAll().subscribe(types => {
-      this.memberTypes = types;
-    });
-  }
+  protected readonly loading = signal(false);
 
-  protected onTypeChange() {
-    this.selectedType = this.memberTypes.find(t => t.id === this.selectedTypeId) || null;
-    this.members = [];
+  private memberTypeId= toSignal(
+    this.activatedRoute.paramMap.pipe(map(p => p.get('id'))),
+  );
 
-    if (this.selectedType) {
-      this.memberService.getByType(this.selectedTypeId).subscribe(data => {
+  private readonly loadData = effect(() => {
+    this.loading.set(true);
+    const memberTypeId = this.memberTypeId();
+    if (memberTypeId) {
+      this.memberTypeService.get(memberTypeId).subscribe(memberType => {
+        this.selectedType = memberType;
+      })
+
+      this.memberService.getByType(memberTypeId).subscribe(data => {
         this.members = data;
+        this.loading.set(false);
       });
     }
-  }
+  })
 
   protected editMember(member: any) {
     this.editId = member.id;
@@ -66,11 +75,15 @@ export class MemberTable implements OnInit {
     }
   }
 
-  protected exportToPdf() {
+  protected exportToPdf(selectedType?: MemberType | null) {
+    if (!selectedType) {
+      return;
+    }
+
     const doc = new jsPDF();
-    const columns = this.selectedType!.attributes.map(attr => attr.name);
+    const columns = selectedType.attributes.map(attr => attr.name);
     const rows = this.members.map(member =>
-      this.selectedType!.attributes.map(attr => member.data[attr.name] ?? '')
+      selectedType.attributes.map(attr => member.data[attr.name] ?? '')
     );
 
     autoTable(doc, {
@@ -81,6 +94,6 @@ export class MemberTable implements OnInit {
       headStyles: { fillColor: [22, 160, 133] },
     });
 
-    doc.save(`${this.selectedType!.name}_clenove.pdf`);
+    doc.save(`${selectedType.name}_clenove.pdf`);
   }
 }
