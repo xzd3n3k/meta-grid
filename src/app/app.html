@@ -1,4 +1,6 @@
-<hxt-sidenav></hxt-sidenav>
-<div class="page-container">
+@if (user()) {
+  <hxt-sidenav></hxt-sidenav>
+}
+<div class="page-container" [class.removeLeftMargin]="!user()">
   <router-outlet />
 </div>
