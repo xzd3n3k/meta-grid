@@ -48,20 +48,27 @@
   }
 
   a {
-    position: relative;
+    display: flex;
+    align-items: center;
     color: rgb(85, 83, 83);
     font-size: 14px;
-    display: table;
-    width: 300px;
+    width: 100%;
     padding: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .ico {
     padding: 8px;
+    flex-shrink: 0;
   }
 
   .nav-item {
     margin-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   a:hover {
