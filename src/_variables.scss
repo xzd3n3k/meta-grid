@@ -47,11 +47,20 @@
   --color-success-900: #14532d;
   --color-success-950: #052e16;
 
-  --color-primary: var(--color-primary-300);
-  --color-secondary: var(--color-secondary-300);
-  --color-danger: var(--color-danger-300);
-  --color-success: var(--color-success-300);
+  --color-primary: var(--color-primary-600);
+  --color-secondary: var(--color-secondary-600);
+  --color-danger: var(--color-danger-600);
+  --color-success: var(--color-success-600);
+
+  --color-white: rgb(255, 255, 255);
+  --color-white-dark: rgb(239, 239, 239);
+  --color-black: rgb(0, 0, 0);
+  --color-black-light: rgb(91, 91, 91);
+  --color-grey: rgb(147, 147, 147);
+  --color-grey-light: rgb(201, 201, 201);
 
   --button-padding-base: 6px;
   --button-padding-half: calc(var(--button-padding-base) / 2);
+
+  --sidenav-width: 90px;
 }

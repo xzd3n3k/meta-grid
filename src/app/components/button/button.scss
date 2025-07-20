@@ -21,11 +21,11 @@
     --primary-color: var(--color-primary);
 
     &:hover {
-      background-color: var(--color-primary-400);
+      background-color: var(--color-primary-700);
     }
 
     &:active {
-      background-color: var(--color-primary-500);
+      background-color: var(--color-primary-800);
     }
   }
 
@@ -38,11 +38,11 @@
     --primary-color: var(--color-secondary);
 
     &:hover {
-      background-color: var(--color-secondary-400);
+      background-color: var(--color-secondary-700);
     }
 
     &:active {
-      background-color: var(--color-secondary-500);
+      background-color: var(--color-secondary-800);
     }
   }
 
@@ -55,11 +55,11 @@
     --primary-color: var(--color-success);
 
     &:hover {
-      background-color: var(--color-success-400);
+      background-color: var(--color-success-700);
     }
 
     &:active {
-      background-color: var(--color-success-500);
+      background-color: var(--color-success-800);
     }
   }
 
@@ -72,11 +72,11 @@
     --primary-color: var(--color-danger);
 
     &:hover {
-      background-color: var(--color-danger-400);
+      background-color: var(--color-danger-700);
     }
 
     &:active {
-      background-color: var(--color-danger-500);
+      background-color: var(--color-danger-800);
     }
   }
 
