@@ -56,18 +56,30 @@
                 </td>
               }
               <td>
-                <hxt-button (click)="saveEdit(member.id)">💾 Uložit</hxt-button>
-                <hxt-button (click)="cancelEdit()">✖ Zrušit</hxt-button>
+                <span class="table-action-buttons">
+                  <hxt-button (click)="saveEdit(member.id)">💾 Uložit</hxt-button>
+                  <hxt-button (click)="cancelEdit()">✖ Zrušit</hxt-button>
+                </span>
               </td>
             } @else {
               @for (attr of selectedType.attributes; track $index) {
                 <td>
-                  {{ member.data[attr.name] }}
+                  @if (attr.type === 'boolean') {
+                    <input
+                      type="checkbox"
+                      class="prevent-checkbox-click"
+                      [checked]="member.data[attr.name]"
+                    />
+                  } @else {
+                      {{ member.data[attr.name] }}
+                  }
                 </td>
               }
               <td>
-                <hxt-button (click)="editMember(member)">✏️ Upravit</hxt-button>
-                <hxt-button (click)="deleteMember(member.id)">🗑️ Smazat</hxt-button>
+                <span class="table-action-buttons">
+                  <hxt-button (click)="editMember(member)">✏️ Upravit</hxt-button>
+                  <hxt-button (click)="deleteMember(member.id)">🗑️ Smazat</hxt-button>
+                </span>
               </td>
             }
           </tr>

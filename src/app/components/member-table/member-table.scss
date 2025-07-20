@@ -3,3 +3,7 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.prevent-checkbox-click {
+  pointer-events: none;
+}
