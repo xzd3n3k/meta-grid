@@ -31,17 +31,7 @@ export class MemberForm implements OnInit {
 
   protected onTypeChange() {
     this.selectedType = this.memberTypes.find(t => t.id === this.selectedTypeId) || null;
-    this.formData = {};
-
-    if (this.selectedType) {
-      for (let attr of this.selectedType.attributes) {
-        if (attr.type === 'boolean') {
-          this.formData[attr.name] = false;
-        } else {
-          this.formData[attr.name] = null;
-        }
-      }
-    }
+    this.resetFormData();
   }
 
   protected submit() {
@@ -52,12 +42,25 @@ export class MemberForm implements OnInit {
       data: this.formData,
     }).subscribe({
       next: () => {
-        this.formData = {};
+        this.resetFormData();
       },
       error: (error) => {
         console.error('Chyba při ukládání člena:', error);
       }
     });
+  }
+
+  private resetFormData() {
+    this.formData = {}
+    if (this.selectedType) {
+      for (let attr of this.selectedType.attributes) {
+        if (attr.type === 'boolean') {
+          this.formData[attr.name] = false;
+        } else {
+          this.formData[attr.name] = null;
+        }
+      }
+    }
   }
 
 }
