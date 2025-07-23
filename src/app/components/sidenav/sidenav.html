@@ -9,6 +9,7 @@
         <span class="nav-item">Odhlásit se</span>
       </a>
     </li>
+    <hr>
     <li>
       <a class="nav-content" routerLink="novy-clen">
         <img class="ico" src="assets/userPlus.svg" height="40" width="70">
@@ -27,6 +28,9 @@
         <span class="nav-item">Spravovat typy členů</span>
       </a>
     </li>
+    @if (memberTypes().length > 0) {
+      <hr>
+    }
     @for (memberType of memberTypes(); track memberType.id) {
       <li>
         <a class="nav-content" [routerLink]="['tabulka', memberType.id]">
