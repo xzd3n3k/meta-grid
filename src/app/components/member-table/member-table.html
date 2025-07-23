@@ -1,25 +1,43 @@
 <div class="table-wrapper">
-  @if (selectedType && members.length > 0 && !loading()) {
+  @let selectedTypeVar = selectedType();
+  @if (selectedTypeVar && members.length > 0 && !loading()) {
     <hxt-button
-      (click)="exportToPdf(selectedType)"
+      (click)="exportToPdf(selectedTypeVar)"
     >
       Exportovat do PDF
     </hxt-button>
 
     <table>
+      @if (anyBooleanAttributes()) {
+        <tr class="filter-row">
+          @for (attr of selectedTypeVar.attributes; track $index) {
+            <th>
+              @if (attr.type === 'boolean') {
+                <hxt-tristate-toggle-switch
+                  #booleanToggleFilter
+                  [label]="{onLabel: 'Ano', offLabel: 'Ne', indeterminateLabel: 'Vše'}"
+                  (stateChangeBoolean)="toggleBooleanFilter(attr.name, $event)"
+                >
+                </hxt-tristate-toggle-switch>
+              }
+            </th>
+          }
+          <th><hxt-button (click)="resetToggleFilters()" severity="secondary">Resetovat filtry</hxt-button></th>
+        </tr>
+      }
       <thead>
       <tr>
-        @for (attr of selectedType.attributes; track $index) {
+        @for (attr of selectedTypeVar.attributes; track $index) {
           <th>{{ attr.name }}</th>
         }
         <th>Akce</th>
       </tr>
       </thead>
       <tbody>
-        @for (member of members; track $index) {
+        @for (member of filteredMembers(); track $index) {
           <tr class="table-row">
             @if (editId === member.id) {
-              @for (attr of selectedType.attributes; track $index) {
+              @for (attr of selectedTypeVar.attributes; track $index) {
                 <td>
                   @switch (attr.type) {
                     @case ('text') {
@@ -62,7 +80,7 @@
                 </span>
               </td>
             } @else {
-              @for (attr of selectedType.attributes; track $index) {
+              @for (attr of selectedTypeVar.attributes; track $index) {
                 <td>
                   @if (attr.type === 'boolean') {
                     <input
@@ -87,7 +105,7 @@
       </tbody>
     </table>
   }
-  @if (members.length === 0 && !loading()) {
+  @if (filteredMembers().length === 0 && !loading()) {
     <img [src]="'assets/EmptyStateWText.svg'" class="emptyBackground" alt="empty">
   }
 </div>
