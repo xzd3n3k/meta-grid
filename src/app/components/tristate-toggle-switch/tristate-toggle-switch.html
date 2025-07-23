@@ -1,0 +1,21 @@
+<div class="tristate-toggle-wrapper">
+  <div
+    class="tristate-toggle"
+    [ngClass]="state$()"
+    (click)="nextState()"
+    role="switch"
+    [attr.aria-checked]="state$()"
+    tabindex="0"
+    (keydown.space)="nextState()"
+  >
+    <div class="slider" [style.left]="sliderPosition[state$()]"></div>
+  </div>
+  @let labelVar = label();
+  @if (labelVar) {
+    @switch (state$()) {
+      @case ('on') { {{labelVar.onLabel}} }
+      @case ('off') { {{labelVar.offLabel}} }
+      @default { {{labelVar.indeterminateLabel}} }
+    }
+  }
+</div>

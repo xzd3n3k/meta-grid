@@ -1,0 +1,40 @@
+.tristate-toggle {
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &.on {
+    background-color: var(--color-primary);
+  }
+
+  &.indeterminate {
+    // background-color: #ff9800;
+  }
+
+  &.off {
+    background-color: var(--color-primary);
+  }
+
+  .slider {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: left 0.3s ease;
+  }
+}
+
+.tristate-toggle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  text-align: center;
+}
