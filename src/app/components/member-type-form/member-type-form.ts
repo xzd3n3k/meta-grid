@@ -1,9 +1,15 @@
 import {Component, computed, effect, inject, input, output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {MemberAttribute, MemberType, MemberTypeInit, MemberTypeService} from '../../shared/member-type.service';
+import {
+  MemberAttribute,
+  MemberType,
+  MemberTypeInit,
+  MemberTypeService
+} from '../../shared/member-type.service';
 import {FormField} from '../form-field/form-field';
 import {Button} from '../button/button';
+import {MemberService} from '../../shared/member.service';
 
 @Component({
   selector: 'hxt-member-type-form',
@@ -12,7 +18,8 @@ import {Button} from '../button/button';
   styleUrl: './member-type-form.scss',
 })
 export class MemberTypeForm {
-  private memberTypeService = inject(MemberTypeService);
+  private readonly memberTypeService = inject(MemberTypeService);
+  private readonly memberService = inject(MemberService);
 
   readonly memberType = input<MemberType | null | undefined>(null);
 
@@ -28,12 +35,25 @@ export class MemberTypeForm {
 
     if (memberType) {
       this.name = memberType.name;
-      this.attributes = memberType.attributes;
+      this.attributes = memberType.attributes.map(attr => ({ ...attr }));
     }
   })
 
+  public resetForm() {
+    const memberType = this.memberType();
+
+    if (memberType) {
+      this.name = memberType.name;
+      this.attributes = memberType.attributes.map(attr => ({ ...attr }));
+      return;
+    }
+
+    this.name = '';
+    this.attributes = [];
+  }
+
   protected addAttribute() {
-    this.attributes.push({ name: '', type: 'text' });
+    this.attributes.push({ id: crypto.randomUUID(), name: '', type: 'text' });
   }
 
   protected removeAttribute(index: number) {
@@ -57,8 +77,7 @@ export class MemberTypeForm {
 
       this.memberTypeService.create(memberType).subscribe({
         next: () => {
-          this.name = '';
-          this.attributes = [];
+          this.resetForm();
           this.submittedSuccessfully.emit();
         },
         error: err => {
@@ -70,10 +89,28 @@ export class MemberTypeForm {
       return;
     }
 
+    const memberTypeAttrsOriginal = this.memberType()?.attributes;
+
+    if (memberTypeAttrsOriginal) {
+      const originalMap = new Map(memberTypeAttrsOriginal.map(attr => [attr.id, attr.name]));
+
+      this.attributes.forEach(attr => {
+        const originalName = originalMap.get(attr.id);
+
+        if (originalName !== undefined && originalName !== attr.name) {
+          this.memberService.renameAttributeInMembers(memberTypeId, originalName, attr.name).subscribe({
+            next: () => {},
+            error: err => {
+              console.error('Error updating member type:', err);
+            }
+          });
+        }
+      });
+    }
+
     this.memberTypeService.update(memberTypeId, memberType).subscribe({
       next: () => {
-        this.name = '';
-        this.attributes = [];
+        this.resetForm();
         this.submittedSuccessfully.emit();
       },
       error: err => {

@@ -16,6 +16,7 @@ import {switchMap} from 'rxjs/operators';
 import {AuthService} from './auth.service';
 
 export interface MemberAttribute {
+  id: string;
   name: string;
   type: 'text' | 'number' | 'date' | 'boolean';
 }

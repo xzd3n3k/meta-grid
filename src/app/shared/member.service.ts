@@ -10,7 +10,7 @@ import {
   doc,
   updateDoc, getDocs, writeBatch
 } from '@angular/fire/firestore';
-import {from, Observable} from 'rxjs';
+import {defer, from, Observable, of} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -58,4 +58,64 @@ export class MemberService {
       })
     );
   }
+
+  removeAttributeFromMembers(memberTypeId: string, removedAttrName: string) {
+    const q = query(this.collRef, where('memberTypeId', '==', memberTypeId));
+
+    return from(getDocs(q)).pipe(
+      switchMap(snapshot => {
+        const batch = writeBatch(this.firestore);
+        let hasUpdates = false;
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data()['data']
+
+          if (data && Object.prototype.hasOwnProperty.call(data, removedAttrName)) {
+            delete data[removedAttrName];
+            const ref = doc(this.firestore, 'members', docSnap.id);
+            batch.update(ref, { data });
+            hasUpdates = true;
+          }
+        });
+
+        return hasUpdates ? defer(() => batch.commit()) : of(void 0);
+      })
+    );
+  }
+
+  renameAttributeInMembers(
+    memberTypeId: string,
+    originalAttrName: string,
+    newAttrName: string
+  ) {
+    const q = query(this.collRef, where('memberTypeId', '==', memberTypeId));
+
+    return from(getDocs(q)).pipe(
+      switchMap(snapshot => {
+        const batch = writeBatch(this.firestore);
+        let hasUpdates = false;
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data()['data'];
+
+          if (
+            data &&
+            Object.prototype.hasOwnProperty.call(data, originalAttrName) &&
+            originalAttrName !== newAttrName
+          ) {
+            // Rename: copy + delete
+            data[newAttrName] = data[originalAttrName];
+            delete data[originalAttrName];
+
+            const ref = doc(this.firestore, 'members', docSnap.id);
+            batch.update(ref, { data });
+            hasUpdates = true;
+          }
+        });
+
+        return hasUpdates ? defer(() => batch.commit()) : of(void 0);
+      })
+    );
+  }
+
 }
