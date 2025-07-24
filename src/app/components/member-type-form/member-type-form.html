@@ -39,6 +39,6 @@
 
   <span class="form-action-buttons-bottom">
     <hxt-button (click)="addAttribute()">➕ Přidat atribut</hxt-button>
-    <hxt-button [type]="'submit'">💾 Uložit typ člena</hxt-button>
+    <hxt-button [type]="'submit'" [disabled]="!name">💾 Uložit typ člena</hxt-button>
   </span>
 </form>
