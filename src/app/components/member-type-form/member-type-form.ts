@@ -92,7 +92,17 @@ export class MemberTypeForm {
     const memberTypeAttrsOriginal = this.memberType()?.attributes;
 
     if (memberTypeAttrsOriginal) {
-      const originalMap = new Map(memberTypeAttrsOriginal.map(attr => [attr.id, attr.name]));
+      const originalMap = new Map(memberTypeAttrsOriginal.map(attr => {
+        if (!this.attributes.find(attribute => attribute.id === attr.id)) {
+          this.memberService.removeAttributeFromMembers(memberTypeId, attr.name).subscribe({
+            next: () => {},
+            error: err => {
+              console.error('Error updating member type:', err);
+            }
+          });
+        }
+        return [attr.id, attr.name]
+      }));
 
       this.attributes.forEach(attr => {
         const originalName = originalMap.get(attr.id);
