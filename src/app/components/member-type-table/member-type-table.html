@@ -30,6 +30,6 @@
   <p>Žádné typy členů.</p>
 }
 
-<hxt-dialog #dialog title="Upravit typ člena">
-  <hxt-member-type-form [memberType]="memberType()" (submittedSuccessfully)="closeDialog(dialog)"></hxt-member-type-form>
+<hxt-dialog #dialog title="Upravit typ člena" (closed)="memberTypeForm.resetForm()">
+  <hxt-member-type-form #memberTypeForm [memberType]="memberType()" (submittedSuccessfully)="closeDialog(dialog)"></hxt-member-type-form>
 </hxt-dialog>
