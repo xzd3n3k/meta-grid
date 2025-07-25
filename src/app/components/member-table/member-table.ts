@@ -13,6 +13,9 @@ import {Button} from '../button/button';
 import {LoadingSpinner} from '../loading-spinner/loading-spinner';
 import {TriState, TristateToggleSwitch} from '../tristate-toggle-switch/tristate-toggle-switch';
 
+type FilterType = 'text' | 'number' | 'date' | 'boolean';
+type FilterValue = string | number | boolean | Date | null;
+
 @Component({
   selector: 'hxt-member-table',
   imports: [CommonModule, FormsModule, Button, LoadingSpinner, TristateToggleSwitch],
@@ -33,41 +36,13 @@ export class MemberTable {
   protected editId: string | null = null;
   protected editableMember: Record<string, any> = {};
 
+  filters: { [attributeName: string]: FilterValue } = {};
+
   protected readonly loading = signal(false);
-  protected readonly anyBooleanAttributes = signal(false);
-
-  resetToggleFilters() {
-    this.toggleSwitches().forEach(toggle => {
-      toggle.setState('indeterminate');
-    })
-  }
-
-  filters: { [attributeName: string]: boolean | null } = {};
-
-  toggleBooleanFilter(attrName: string, state: boolean | null): void {
-    this.filters[attrName] = state;
-  }
-
-  clearBooleanFilter(attrName: string): void {
-    this.filters[attrName] = null;
-  }
-
-  filteredMembers(): any[] {
-    return this.members.filter(member => {
-      return Object.entries(this.filters).every(([key, value]) => {
-        if (value === null) return true;
-        return member.data[key] === value;
-      });
-    });
-  }
 
   private readonly memberTypeId= toSignal(
     this.activatedRoute.paramMap.pipe(map(p => p.get('id'))),
   );
-
-  private readonly findBooleanAttributes = effect(() => {
-    this.anyBooleanAttributes.set(this.selectedType()?.attributes.some(attribute => attribute.type === 'boolean') ?? false);
-  })
 
   private readonly loadData = effect(() => {
     this.loading.set(true);
@@ -83,6 +58,49 @@ export class MemberTable {
       });
     }
   })
+
+  public resetFilters(): void {
+    this.filters = {};
+    this.resetToggleFilters();
+  }
+
+  protected updateFilter(attrName: string, value: FilterValue): void {
+    this.filters[attrName] = value;
+  }
+
+  protected clearFilter(attrName: string): void {
+    delete this.filters[attrName];
+  }
+
+  protected filteredMembers(): any[] {
+    console.log('filtruju')
+    return this.members.filter(member => {
+      return Object.entries(this.filters).every(([key, filterValue]) => {
+        if (filterValue === null || filterValue === '' || filterValue === undefined) return true;
+
+        const memberValue = member.data[key];
+        if (memberValue === null || memberValue === undefined) return false;
+
+        const attribute = this.selectedType()?.attributes.find(attr => attr.name === key);
+        if (!attribute) return true;
+
+        switch (attribute.type) {
+          case 'text':
+            return memberValue.toString().toLowerCase().includes((filterValue as string).toLowerCase());
+          case 'number':
+            return Number(memberValue) === Number(filterValue);
+          case 'boolean':
+            return memberValue === filterValue;
+          case 'date':
+            const memberDate = new Date(memberValue);
+            const filterDate = new Date(filterValue as Date);
+            return memberDate.toDateString() === filterDate.toDateString();
+          default:
+            return true;
+        }
+      });
+    });
+  }
 
   protected editMember(member: any) {
     this.editId = member.id;
@@ -129,5 +147,11 @@ export class MemberTable {
     });
 
     doc.save(`${selectedType.name}_clenove.pdf`);
+  }
+
+  private resetToggleFilters() {
+    this.toggleSwitches().forEach(toggle => {
+      toggle.setState('indeterminate');
+    })
   }
 }

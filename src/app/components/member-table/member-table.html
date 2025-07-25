@@ -11,23 +11,40 @@
     </hxt-button>
 
     <table>
-      @if (anyBooleanAttributes()) {
-        <tr class="filter-row">
-          @for (attr of selectedTypeVar.attributes; track $index) {
-            <th>
-              @if (attr.type === 'boolean') {
-                <hxt-tristate-toggle-switch
-                  #booleanToggleFilter
-                  [label]="{onLabel: 'Ano', offLabel: 'Ne', indeterminateLabel: 'Vše'}"
-                  (stateChangeBoolean)="toggleBooleanFilter(attr.name, $event)"
-                >
-                </hxt-tristate-toggle-switch>
-              }
-            </th>
-          }
-          <th><hxt-button (click)="resetToggleFilters()" severity="secondary">Resetovat filtry</hxt-button></th>
-        </tr>
-      }
+      <tr class="filter-row">
+        @for (attr of selectedTypeVar.attributes; track $index) {
+          <th>
+            @if (attr.type === 'boolean') {
+              <hxt-tristate-toggle-switch
+                #booleanToggleFilter
+                [label]="{onLabel: 'Ano', offLabel: 'Ne', indeterminateLabel: 'Vše'}"
+                (stateChangeBoolean)="updateFilter(attr.name, $event)"
+              >
+              </hxt-tristate-toggle-switch>
+            } @else if (attr.type === 'text') {
+              <input
+                type="text"
+                [(ngModel)]="filters[attr.name]"
+                (ngModelChange)="updateFilter(attr.name, $event)"
+              />
+            } @else if (attr.type === 'number') {
+              <input
+                type="number"
+                [(ngModel)]="filters[attr.name]"
+                (ngModelChange)="updateFilter(attr.name, $event)"
+              />
+            }
+            @else if (attr.type === 'date') {
+              <input
+                type="date"
+                [(ngModel)]="filters[attr.name]"
+                (ngModelChange)="updateFilter(attr.name, $event)"
+              />
+            }
+          </th>
+        }
+        <th><hxt-button (click)="resetFilters()" severity="secondary">Resetovat filtry</hxt-button></th>
+      </tr>
       <thead>
       <tr>
         @for (attr of selectedTypeVar.attributes; track $index) {
