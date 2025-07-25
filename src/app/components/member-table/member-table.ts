@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, signal, effect, viewChild, viewChildren} from '@angular/core';
+import {Component, OnInit, inject, signal, effect, viewChild, viewChildren, computed} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MemberService} from '../../shared/member.service';
@@ -27,17 +27,14 @@ export class MemberTable {
   private memberService = inject(MemberService);
   private activatedRoute = inject(ActivatedRoute);
 
-  private readonly toggleSwitches = viewChildren(TristateToggleSwitch);
-
-  protected readonly selectedType = signal<MemberType | null>(null);
-
-  protected members: any[] = [];
-
   protected editId: string | null = null;
   protected editableMember: Record<string, any> = {};
 
-  filters: { [attributeName: string]: FilterValue } = {};
+  private readonly toggleSwitches = viewChildren(TristateToggleSwitch);
 
+  protected readonly selectedType = signal<MemberType | null>(null);
+  protected readonly members = signal<any[]>([]);
+  protected readonly filters = signal<{ [attributeName: string]: FilterValue }>({});
   protected readonly loading = signal(false);
 
   private readonly memberTypeId= toSignal(
@@ -50,38 +47,45 @@ export class MemberTable {
     if (memberTypeId) {
       this.memberTypeService.get(memberTypeId).subscribe(memberType => {
         this.selectedType.set(memberType);
-      })
+      });
 
       this.memberService.getByType(memberTypeId).subscribe(data => {
-        this.members = data;
+        this.members.set(data);
         this.loading.set(false);
       });
     }
-  })
+  });
 
   public resetFilters(): void {
-    this.filters = {};
+    this.filters.set({});
     this.resetToggleFilters();
   }
 
   protected updateFilter(attrName: string, value: FilterValue): void {
-    this.filters[attrName] = value;
+    this.filters.update(f => ({ ...f, [attrName]: value }));
   }
 
   protected clearFilter(attrName: string): void {
-    delete this.filters[attrName];
+    this.filters.update(f => {
+      const updated = { ...f };
+      delete updated[attrName];
+      return updated;
+    });
   }
 
-  protected filteredMembers(): any[] {
-    console.log('filtruju')
-    return this.members.filter(member => {
-      return Object.entries(this.filters).every(([key, filterValue]) => {
+  protected readonly filteredMembers = computed(() => {
+    const selectedType = this.selectedType();
+    const filters = this.filters();
+    const members = this.members();
+
+    return members.filter(member => {
+      return Object.entries(filters).every(([key, filterValue]) => {
         if (filterValue === null || filterValue === '' || filterValue === undefined) return true;
 
         const memberValue = member.data[key];
         if (memberValue === null || memberValue === undefined) return false;
 
-        const attribute = this.selectedType()?.attributes.find(attr => attr.name === key);
+        const attribute = selectedType?.attributes.find(attr => attr.name === key);
         if (!attribute) return true;
 
         switch (attribute.type) {
@@ -100,7 +104,7 @@ export class MemberTable {
         }
       });
     });
-  }
+  });
 
   protected editMember(member: any) {
     this.editId = member.id;
@@ -114,7 +118,11 @@ export class MemberTable {
 
   protected saveEdit(id: string) {
     this.memberService.update(id, this.editableMember).subscribe(() => {
-      this.members.find(m => m.id === id).data = this.editableMember;
+      this.members.update(members =>
+        members.map(member =>
+          member.id === id ? { ...member, data: { ...this.editableMember } } : member
+        )
+      );
       this.cancelEdit();
     });
   }
@@ -122,7 +130,7 @@ export class MemberTable {
   protected deleteMember(id: string) {
     if (confirm('Opravdu chcete smazat tohoto člena?')) {
       this.memberService.delete(id).subscribe(() => {
-        this.members = this.members.filter(m => m.id !== id);
+        this.members.update(members => members.filter(m => m.id !== id));
       });
     }
   }

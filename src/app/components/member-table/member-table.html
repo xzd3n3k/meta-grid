@@ -3,7 +3,7 @@
   @if (selectedTypeVar) {
     <h1>{{selectedTypeVar.name}}</h1>
   }
-  @if (selectedTypeVar && members.length > 0 && !loading()) {
+  @if (selectedTypeVar && members().length > 0 && !loading()) {
     <hxt-button
       (click)="exportToPdf(selectedTypeVar)"
     >
@@ -24,20 +24,20 @@
             } @else if (attr.type === 'text') {
               <input
                 type="text"
-                [(ngModel)]="filters[attr.name]"
+                [(ngModel)]="filters()[attr.name]"
                 (ngModelChange)="updateFilter(attr.name, $event)"
               />
             } @else if (attr.type === 'number') {
               <input
                 type="number"
-                [(ngModel)]="filters[attr.name]"
+                [(ngModel)]="filters()[attr.name]"
                 (ngModelChange)="updateFilter(attr.name, $event)"
               />
             }
             @else if (attr.type === 'date') {
               <input
                 type="date"
-                [(ngModel)]="filters[attr.name]"
+                [(ngModel)]="filters()[attr.name]"
                 (ngModelChange)="updateFilter(attr.name, $event)"
               />
             }
