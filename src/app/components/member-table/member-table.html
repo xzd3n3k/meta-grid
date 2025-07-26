@@ -108,6 +108,8 @@
                       class="prevent-checkbox-click"
                       [checked]="member.data[attr.name]"
                     />
+                  } @else if (attr.type === 'date') {
+                    {{ member.data[attr.name] | date: 'dd.MM.yyyy' }}
                   } @else {
                       {{ member.data[attr.name] }}
                   }
