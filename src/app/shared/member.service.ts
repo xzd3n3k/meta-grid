@@ -83,6 +83,34 @@ export class MemberService {
     );
   }
 
+  addAttributeToAllMembers(
+    memberTypeId: string,
+    newAttrName: string,
+    defaultValue: any
+  ) {
+    const q = query(this.collRef, where('memberTypeId', '==', memberTypeId));
+
+    return from(getDocs(q)).pipe(
+      switchMap(snapshot => {
+        const batch = writeBatch(this.firestore);
+        let hasUpdates = false;
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data()['data'] || {};
+
+          if (!Object.prototype.hasOwnProperty.call(data, newAttrName)) {
+            data[newAttrName] = defaultValue;
+            const ref = doc(this.firestore, 'members', docSnap.id);
+            batch.update(ref, { data });
+            hasUpdates = true;
+          }
+        });
+
+        return hasUpdates ? defer(() => batch.commit()) : of(void 0);
+      })
+    );
+  }
+
   renameAttributeInMembers(
     memberTypeId: string,
     originalAttrName: string,

@@ -107,11 +107,18 @@ export class MemberTypeForm {
       this.attributes.forEach(attr => {
         const originalName = originalMap.get(attr.id);
 
-        if (originalName !== undefined && originalName !== attr.name) {
+        if (originalName != undefined && originalName !== attr.name) {
           this.memberService.renameAttributeInMembers(memberTypeId, originalName, attr.name).subscribe({
             next: () => {},
             error: err => {
               console.error('Error updating member type:', err);
+            }
+          });
+        } else if (!originalName && attr.type === 'boolean') {
+          this.memberService.addAttributeToAllMembers(memberTypeId, attr.name, false).subscribe({
+            next: () => {},
+            error: err => {
+              console.error('Error adding attribute to members:', err);
             }
           });
         }
