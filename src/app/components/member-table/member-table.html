@@ -5,6 +5,7 @@
   }
   @if (selectedTypeVar && members().length > 0 && !loading()) {
     <hxt-button
+      [disabled]="filteredMembers().length == 0"
       (click)="exportToPdf(selectedTypeVar)"
     >
       Exportovat do PDF
