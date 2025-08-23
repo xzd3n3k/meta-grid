@@ -36,6 +36,27 @@ export class MemberTable {
   protected readonly members = signal<any[]>([]);
   protected readonly filters = signal<{ [attributeName: string]: FilterValue }>({});
   protected readonly loading = signal(false);
+  protected readonly currentPage = signal(1);
+  protected readonly pageSize = signal(5);
+
+  protected readonly paginatedMembers = computed(() => {
+    const members = this.filteredMembers();
+    const page = this.currentPage();
+    const size = this.pageSize();
+    const start = (page - 1) * size;
+    return members.slice(start, start + size);
+  });
+
+  protected readonly totalPages = computed(() =>
+    Math.ceil(this.filteredMembers().length / this.pageSize())
+  );
+
+  protected goToPage(page: number): void {
+    const total = this.totalPages();
+    if (page >= 1 && page <= total) {
+      this.currentPage.set(page);
+    }
+  }
 
   private readonly memberTypeId= toSignal(
     this.activatedRoute.paramMap.pipe(map(p => p.get('id'))),
@@ -59,10 +80,12 @@ export class MemberTable {
   public resetFilters(): void {
     this.filters.set({});
     this.resetToggleFilters();
+    this.currentPage.set(1);
   }
 
   protected updateFilter(attrName: string, value: FilterValue): void {
     this.filters.update(f => ({ ...f, [attrName]: value }));
+    this.currentPage.set(1);
   }
 
   protected clearFilter(attrName: string): void {

@@ -5,7 +5,7 @@
   }
   @if (selectedTypeVar && members().length > 0 && !loading()) {
     <hxt-button
-      [disabled]="filteredMembers().length == 0"
+      [disabled]="paginatedMembers().length == 0"
       (click)="exportToPdf(selectedTypeVar)"
     >
       Exportovat do PDF
@@ -55,7 +55,7 @@
       </tr>
       </thead>
       <tbody>
-        @for (member of filteredMembers(); track $index) {
+        @for (member of paginatedMembers(); track $index) {
           <tr class="table-row">
             @if (editId === member.id) {
               @for (attr of selectedTypeVar.attributes; track $index) {
@@ -128,10 +128,33 @@
       </tbody>
     </table>
   }
-  @if (filteredMembers().length === 0 && !loading()) {
+  @if (paginatedMembers().length === 0 && !loading()) {
     <img [src]="'assets/EmptyStateWText.svg'" class="emptyBackground" alt="empty">
   }
 </div>
 @if (loading()) {
   <hxt-loading-spinner></hxt-loading-spinner>
+}
+
+@if (totalPages() > 1) {
+  <div class="pagination-controls">
+    <hxt-button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" appearance="outline">◀️</hxt-button>
+
+    @for (page of [].constructor(totalPages()); let i = $index; track i) {
+      <hxt-button
+        appearance="flat"
+        [disabled]="currentPage() === i + 1"
+        (click)="goToPage(i + 1)">
+        {{ i + 1 }}
+      </hxt-button>
+    }
+
+    <hxt-button
+      (click)="goToPage(currentPage() + 1)"
+      [disabled]="currentPage() === totalPages()"
+      appearance="outline"
+    >
+      ▶️
+    </hxt-button>
+  </div>
 }
