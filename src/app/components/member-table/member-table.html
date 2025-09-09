@@ -131,30 +131,42 @@
   @if (paginatedMembers().length === 0 && !loading()) {
     <img [src]="'assets/EmptyStateWText.svg'" class="emptyBackground" alt="empty">
   }
-</div>
-@if (loading()) {
-  <hxt-loading-spinner></hxt-loading-spinner>
-}
+  <div class="table-footer">
+    <span class="select-wrapper">
+      <select [(ngModel)]="pageSize">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+      </select>
+    </span>
 
-@if (totalPages() > 1) {
-  <div class="pagination-controls">
+    @if (totalPages() > 1) {
+      <div class="pagination-controls">
     <hxt-button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" appearance="outline">◀️</hxt-button>
 
-    @for (page of [].constructor(totalPages()); let i = $index; track i) {
-      <hxt-button
-        appearance="flat"
-        [disabled]="currentPage() === i + 1"
-        (click)="goToPage(i + 1)">
+        @for (page of [].constructor(totalPages()); let i = $index; track i) {
+          <hxt-button
+            appearance="flat"
+            [disabled]="currentPage() === i + 1"
+            (click)="goToPage(i + 1)">
         {{ i + 1 }}
       </hxt-button>
-    }
+        }
 
-    <hxt-button
-      (click)="goToPage(currentPage() + 1)"
-      [disabled]="currentPage() === totalPages()"
-      appearance="outline"
-    >
+        <hxt-button
+          (click)="goToPage(currentPage() + 1)"
+          [disabled]="currentPage() === totalPages()"
+          appearance="outline"
+        >
       ▶️
     </hxt-button>
   </div>
+    }
+  </div>
+</div>
+@if (loading()) {
+  <hxt-loading-spinner></hxt-loading-spinner>
 }

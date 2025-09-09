@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, signal, effect, viewChild, viewChildren, computed} from '@angular/core';
+import {Component, OnInit, inject, signal, effect, viewChild, viewChildren, computed, model} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MemberService} from '../../shared/member.service';
@@ -37,7 +37,7 @@ export class MemberTable {
   protected readonly filters = signal<{ [attributeName: string]: FilterValue }>({});
   protected readonly loading = signal(false);
   protected readonly currentPage = signal(1);
-  protected readonly pageSize = signal(5);
+  protected readonly pageSize = model(5);
 
   protected readonly paginatedMembers = computed(() => {
     const members = this.filteredMembers();
