@@ -1,6 +1,6 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-/src/app/firebase/firebase.config.ts
+#/src/app/firebase/firebase.config.ts
 
 # Compiled output
 /dist
