@@ -14,5 +14,4 @@ export class App {
   private readonly authService = inject(AuthService);
 
   protected readonly user = toSignal(this.authService.user$);
-  protected readonly title = signal('table-db');
 }
