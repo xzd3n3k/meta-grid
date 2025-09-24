@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import {AuthService} from '../../shared/auth.service';
 import {Button} from '../button/button';
 
@@ -13,17 +12,10 @@ import {Button} from '../button/button';
 })
 export class AuthForm {
   private authService = inject(AuthService);
-  private router = inject(Router);
 
   protected email = '';
   protected password = '';
-  protected isLoginMode = true; // true for login, false for register
   protected errorMessage: string | null = null;
-
-  protected toggleMode() {
-    this.isLoginMode = !this.isLoginMode;
-    this.errorMessage = null; // Clear error message when switching modes
-  }
 
   protected onSubmit() {
     this.errorMessage = null;
@@ -33,16 +25,9 @@ export class AuthForm {
       return;
     }
 
-    const auth$ = this.isLoginMode
-      ? this.authService.signIn(this.email, this.password)
-      : this.authService.signUp(this.email, this.password);
+    const auth$ = this.authService.signIn(this.email, this.password);
 
     auth$.subscribe({
-      next: () => {
-        if (!this.isLoginMode) {
-          this.router.navigate(['/member-types']);
-        }
-      },
       error: (error) => {
         console.error('Authentication error:', error);
         this.errorMessage = this.mapAuthError(error.code);

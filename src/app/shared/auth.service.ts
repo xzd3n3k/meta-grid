@@ -25,13 +25,6 @@ export class AuthService {
   }
 
   /**
-   * Registers a new user with email and password.
-   */
-  signUp(email: string, password: string): Observable<any> {
-    return from(createUserWithEmailAndPassword(this.auth, email, password));
-  }
-
-  /**
    * Signs in an existing user with email and password.
    */
   signIn(email: string, password: string): Observable<any> {

@@ -1,5 +1,5 @@
 <div class="auth-container">
-  <h2>{{ isLoginMode ? 'Přihlásit se' : 'Registrovat se' }}</h2>
+  <h2>Přihlásit se</h2>
 
   <form (ngSubmit)="onSubmit()" class="login-fields">
     <label>
@@ -11,14 +11,8 @@
       <input type="password" [(ngModel)]="password" name="password" required />
     </label>
 
-    <hxt-button [type]="'submit'">{{ isLoginMode ? 'Přihlásit' : 'Registrovat' }}</hxt-button>
+    <hxt-button [type]="'submit'">Přihlásit</hxt-button>
   </form>
-
-  <!--      <p>-->
-  <!--        <a (click)="toggleMode()">-->
-  <!--          {{ isLoginMode ? 'Nemáš účet? Zaregistruj se!' : 'Už máš účet? Přihlas se!' }}-->
-  <!--        </a>-->
-  <!--      </p>-->
 
   @if (errorMessage) {
     <div class="error-message">
