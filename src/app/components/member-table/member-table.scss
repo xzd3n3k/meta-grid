@@ -31,6 +31,54 @@
   pointer-events: none;
 }
 
+.draggable-header {
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .header-label {
+    margin-right: 0.2rem;
+  }
+
+  .drag-indicator {
+    opacity: 0.35;
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+  }
+
+  .attr-badge {
+    font-size: 0.8rem;
+  }
+}
+
+.column-drag-placeholder {
+  min-width: 80px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.08);
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+}
+
+.cdk-drag-preview th {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.autofilled-value {
+  opacity: 0.7;
+  font-style: italic;
+}
+
 .pagination-controls {
   display: flex;
   justify-content: center;

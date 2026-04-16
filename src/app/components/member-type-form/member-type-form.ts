@@ -1,6 +1,7 @@
 import {Component, computed, effect, inject, input, output} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   MemberAttribute,
   MemberType,
@@ -13,7 +14,7 @@ import {MemberService} from '../../shared/member.service';
 
 @Component({
   selector: 'hxt-member-type-form',
-  imports: [CommonModule, FormsModule, FormField, Button],
+  imports: [CommonModule, FormsModule, FormField, Button, DragDropModule],
   templateUrl: './member-type-form.html',
   styleUrl: './member-type-form.scss',
 })
@@ -22,7 +23,6 @@ export class MemberTypeForm {
   private readonly memberService = inject(MemberService);
 
   readonly memberType = input<MemberType | null | undefined>(null);
-
   readonly submittedSuccessfully = output();
 
   private readonly memberTypeId = computed(() => this.memberType()?.id);
@@ -32,22 +32,19 @@ export class MemberTypeForm {
 
   private readonly setFormData = effect(() => {
     const memberType = this.memberType();
-
     if (memberType) {
       this.name = memberType.name;
       this.attributes = memberType.attributes.map(attr => ({ ...attr }));
     }
-  })
+  });
 
   public resetForm() {
     const memberType = this.memberType();
-
     if (memberType) {
       this.name = memberType.name;
       this.attributes = memberType.attributes.map(attr => ({ ...attr }));
       return;
     }
-
     this.name = '';
     this.attributes = [];
   }
@@ -58,6 +55,27 @@ export class MemberTypeForm {
 
   protected removeAttribute(index: number) {
     this.attributes.splice(index, 1);
+  }
+
+  protected drop(event: CdkDragDrop<MemberAttribute[]>) {
+    moveItemInArray(this.attributes, event.previousIndex, event.currentIndex);
+  }
+
+  protected onAutoIdChange(attr: MemberAttribute) {
+    if (attr.isAutoId) {
+      this.attributes.forEach(a => { if (a.id !== attr.id) a.isAutoId = false; });
+      attr.type = 'number';
+      attr.isCreatedAt = false;
+      if (!attr.name) attr.name = 'ID';
+    }
+  }
+
+  protected onCreatedAtChange(attr: MemberAttribute) {
+    if (attr.isCreatedAt) {
+      this.attributes.forEach(a => { if (a.id !== attr.id) a.isCreatedAt = false; });
+      attr.isAutoId = false;
+      if (!attr.name) attr.name = 'Vytvořeno';
+    }
   }
 
   protected submit() {
@@ -74,7 +92,6 @@ export class MemberTypeForm {
     };
 
     if (!memberTypeId) {
-
       this.memberTypeService.create(memberType).subscribe({
         next: () => {
           this.resetForm();
@@ -85,7 +102,6 @@ export class MemberTypeForm {
           alert('Něco se pokazilo při ukládání!');
         }
       });
-
       return;
     }
 
@@ -96,30 +112,23 @@ export class MemberTypeForm {
         if (!this.attributes.find(attribute => attribute.id === attr.id)) {
           this.memberService.removeAttributeFromMembers(memberTypeId, attr.name).subscribe({
             next: () => {},
-            error: err => {
-              console.error('Error updating member type:', err);
-            }
+            error: err => { console.error('Error updating member type:', err); }
           });
         }
-        return [attr.id, attr.name]
+        return [attr.id, attr.name];
       }));
 
       this.attributes.forEach(attr => {
         const originalName = originalMap.get(attr.id);
-
         if (originalName != undefined && originalName !== attr.name) {
           this.memberService.renameAttributeInMembers(memberTypeId, originalName, attr.name).subscribe({
             next: () => {},
-            error: err => {
-              console.error('Error updating member type:', err);
-            }
+            error: err => { console.error('Error updating member type:', err); }
           });
         } else if (!originalName && attr.type === 'boolean') {
           this.memberService.addAttributeToAllMembers(memberTypeId, attr.name, false).subscribe({
             next: () => {},
-            error: err => {
-              console.error('Error adding attribute to members:', err);
-            }
+            error: err => { console.error('Error adding attribute to members:', err); }
           });
         }
       });
@@ -135,6 +144,5 @@ export class MemberTypeForm {
         alert('Něco se pokazilo při ukládání!');
       }
     });
-
   }
 }

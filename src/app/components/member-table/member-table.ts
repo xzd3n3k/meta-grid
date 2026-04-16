@@ -1,12 +1,13 @@
 import {Component, OnInit, inject, signal, effect, viewChild, viewChildren, computed, model} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {MemberService} from '../../shared/member.service';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {ActivatedRoute} from '@angular/router';
-import {MemberType, MemberTypeService} from '../../shared/member-type.service';
+import {MemberAttribute, MemberType, MemberTypeService} from '../../shared/member-type.service';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs/operators';
 import {Button} from '../button/button';
@@ -18,7 +19,7 @@ type FilterValue = string | number | boolean | Date | null;
 
 @Component({
   selector: 'hxt-member-table',
-  imports: [CommonModule, FormsModule, Button, LoadingSpinner, TristateToggleSwitch],
+  imports: [CommonModule, FormsModule, Button, LoadingSpinner, TristateToggleSwitch, DragDropModule],
   templateUrl: './member-table.html',
   styleUrl: './member-table.scss',
 })
@@ -39,6 +40,18 @@ export class MemberTable {
   protected readonly currentPage = signal(1);
   protected readonly pageSize = model(5);
 
+  /** Local column order — initialized from selectedType, reordered by drag-drop and saved to Firestore */
+  protected readonly columnOrder = signal<MemberAttribute[]>([]);
+  private lastLoadedTypeId: string | null = null;
+
+  private readonly syncColumnOrder = effect(() => {
+    const type = this.selectedType();
+    if (type && type.id !== this.lastLoadedTypeId) {
+      this.lastLoadedTypeId = type.id;
+      this.columnOrder.set([...type.attributes]);
+    }
+  });
+
   protected readonly paginatedMembers = computed(() => {
     const members = this.filteredMembers();
     const page = this.currentPage();
@@ -58,7 +71,7 @@ export class MemberTable {
     }
   }
 
-  private readonly memberTypeId= toSignal(
+  private readonly memberTypeId = toSignal(
     this.activatedRoute.paramMap.pipe(map(p => p.get('id'))),
   );
 
@@ -76,6 +89,17 @@ export class MemberTable {
       });
     }
   });
+
+  protected dropColumn(event: CdkDragDrop<MemberAttribute[]>) {
+    const attrs = [...this.columnOrder()];
+    moveItemInArray(attrs, event.previousIndex, event.currentIndex);
+    this.columnOrder.set(attrs);
+
+    const typeId = this.memberTypeId();
+    if (typeId) {
+      this.memberTypeService.update(typeId, { attributes: attrs } as any).subscribe();
+    }
+  }
 
   public resetFilters(): void {
     this.filters.set({});
@@ -158,15 +182,26 @@ export class MemberTable {
     }
   }
 
-  protected exportToPdf(selectedType?: MemberType | null) {
-    if (!selectedType) {
-      return;
+  protected isAutoFilled(attr: MemberAttribute): boolean {
+    return !!attr.isAutoId || !!attr.isCreatedAt;
+  }
+
+  protected formatCellValue(attr: MemberAttribute, value: any): string {
+    if (value == null) return '';
+    if (attr.isCreatedAt) {
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? value : d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
+    return value;
+  }
+
+  protected exportToPdf(selectedType?: MemberType | null) {
+    if (!selectedType) return;
 
     const doc = new jsPDF();
-    const columns = selectedType.attributes.map(attr => attr.name);
+    const columns = this.columnOrder().map(attr => attr.name);
     const rows = this.filteredMembers().map(member =>
-      selectedType.attributes.map(attr => member.data[attr.name] ?? '')
+      this.columnOrder().map(attr => member.data[attr.name] ?? '')
     );
 
     autoTable(doc, {
@@ -183,6 +218,6 @@ export class MemberTable {
   private resetToggleFilters() {
     this.toggleSwitches().forEach(toggle => {
       toggle.setState('indeterminate');
-    })
+    });
   }
 }

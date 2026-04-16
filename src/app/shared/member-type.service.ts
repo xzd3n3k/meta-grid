@@ -19,6 +19,8 @@ export interface MemberAttribute {
   id: string;
   name: string;
   type: 'text' | 'number' | 'date' | 'boolean';
+  isAutoId?: boolean;
+  isCreatedAt?: boolean;
 }
 
 export interface MemberType extends MemberTypeInit {

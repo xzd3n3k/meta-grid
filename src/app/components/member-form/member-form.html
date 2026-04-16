@@ -16,36 +16,48 @@
     <form (ngSubmit)="submit()">
 
       @for (attr of selectedType.attributes; track $index) {
-        <div>
-          <hxt-form-field [label]="attr.name">
-            @if (attr.type === 'text') {
-              <input
-                type="text"
-                [(ngModel)]="formData[attr.name]"
-                [name]="attr.name"
-              />
-            } @else if (attr.type === 'number') {
-              <input
-                type="number"
-                [(ngModel)]="formData[attr.name]"
-                [name]="attr.name"
-              />
-            } @else if (attr.type === 'date') {
-              <input
-                type="date"
-                [(ngModel)]="formData[attr.name]"
-                [name]="attr.name"
-              />
-            } @else if (attr.type === 'boolean') {
-              <input
-                type="checkbox"
-                [(ngModel)]="formData[attr.name]"
-                [name]="attr.name"
-              />
-            }
-          </hxt-form-field>
-        </div>
+        @if (!isAutoFilled(attr)) {
+          <div>
+            <hxt-form-field [label]="attr.name">
+              @if (attr.type === 'text') {
+                <input
+                  type="text"
+                  [(ngModel)]="formData[attr.name]"
+                  [name]="attr.name"
+                />
+              } @else if (attr.type === 'number') {
+                <input
+                  type="number"
+                  [(ngModel)]="formData[attr.name]"
+                  [name]="attr.name"
+                />
+              } @else if (attr.type === 'date') {
+                <input
+                  type="date"
+                  [(ngModel)]="formData[attr.name]"
+                  [name]="attr.name"
+                />
+              } @else if (attr.type === 'boolean') {
+                <input
+                  type="checkbox"
+                  [(ngModel)]="formData[attr.name]"
+                  [name]="attr.name"
+                />
+              }
+            </hxt-form-field>
+          </div>
+        }
       }
+
+      @if (autoFilledAttrs.length > 0) {
+        <p class="autofill-note">
+          🤖 Automaticky vyplněno při uložení:
+          @for (attr of autoFilledAttrs; track attr.id; let last = $last) {
+            <strong>{{ attr.name }}</strong>{{ last ? '' : ', ' }}
+          }
+        </p>
+      }
+
       <hxt-button [type]="'submit'" class="button-on-the-right">💾 Uložit člena</hxt-button>
     </form>
   }

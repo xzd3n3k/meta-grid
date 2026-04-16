@@ -111,6 +111,18 @@ export class MemberService {
     );
   }
 
+  getMaxAttributeValue(memberTypeId: string, attrName: string) {
+    const q = query(this.collRef, where('memberTypeId', '==', memberTypeId));
+    return from(getDocs(q).then(snapshot => {
+      let max = 0;
+      snapshot.forEach(docSnap => {
+        const val = docSnap.data()['data']?.[attrName];
+        if (typeof val === 'number' && val > max) max = val;
+      });
+      return max;
+    }));
+  }
+
   renameAttributeInMembers(
     memberTypeId: string,
     originalAttrName: string,
