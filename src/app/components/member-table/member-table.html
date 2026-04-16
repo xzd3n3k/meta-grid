@@ -8,9 +8,11 @@
   }
 
   @if (selectedTypeVar && members().length > 0 && !loading()) {
-    <hxt-button [disabled]="paginatedMembers().length == 0" (click)="exportToPdf(selectedTypeVar)">
-      Exportovat do PDF
-    </hxt-button>
+    <div style="align-self: flex-start">
+      <hxt-button [disabled]="paginatedMembers().length == 0" (click)="exportToPdf(selectedTypeVar)">
+        Exportovat do PDF
+      </hxt-button>
+    </div>
 
     <div class="table-scroll-wrapper">
       <table>
