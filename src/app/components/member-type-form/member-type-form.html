@@ -8,66 +8,75 @@
   </hxt-form-field>
 
   <h3>Atributy</h3>
+
   <div cdkDropList (cdkDropListDropped)="drop($event)" class="attributes-list">
     @for (attr of attributes; let i = $index; track attr.id) {
-      <div class="attribute-record-wrapper" cdkDrag>
-        <span class="drag-handle" cdkDragHandle title="Přetáhni pro změnu pořadí">⠿</span>
-        <hxt-button (click)="removeAttribute(i)" appearance="flat" severity="danger">❌</hxt-button>
+      <div class="attribute-card" cdkDrag>
 
-        <div class="attribute-fields-wrapper">
-          <div class="attribute-main-fields">
-            <hxt-form-field label="Název">
-              <input
-                type="text"
-                [(ngModel)]="attr.name"
-                [name]="'attr-name-' + i"
-                placeholder="Název atributu"
-              />
-            </hxt-form-field>
+        <!-- Hlavní řádek: drag handle | Název | Typ | smazat -->
+        <div class="attribute-card-main">
+          <span class="drag-handle" cdkDragHandle title="Přetáhni pro změnu pořadí">⠿</span>
 
-            <hxt-form-field label="Typ">
-              <select
-                [(ngModel)]="attr.type"
-                [name]="'attr-type-' + i"
-                [attr.disabled]="attr.isAutoId ? '' : null"
-              >
-                <option value="text">Text</option>
-                <option value="number">Číslo</option>
-                <option value="date">Datum</option>
-                <option value="boolean">Checkbox</option>
-              </select>
-            </hxt-form-field>
+          <div class="attr-field">
+            <label class="attr-label" [for]="'attr-name-' + i">Název</label>
+            <input
+              [id]="'attr-name-' + i"
+              type="text"
+              [(ngModel)]="attr.name"
+              [name]="'attr-name-' + i"
+              placeholder="Název atributu"
+              class="attr-input"
+            />
           </div>
 
-          <div class="attribute-flags">
-            <label class="attr-flag-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="attr.isAutoId"
-                [name]="'attr-autoid-' + i"
-                (ngModelChange)="onAutoIdChange(attr)"
-              />
-              🔢 Auto ID
-            </label>
-            <label class="attr-flag-label">
-              <input
-                type="checkbox"
-                [(ngModel)]="attr.isCreatedAt"
-                [name]="'attr-createdat-' + i"
-                (ngModelChange)="onCreatedAtChange(attr)"
-              />
-              🕒 Datum a čas vytvoření
-            </label>
+          <div class="attr-field attr-field--type">
+            <label class="attr-label" [for]="'attr-type-' + i">Typ</label>
+            <select
+              [id]="'attr-type-' + i"
+              [(ngModel)]="attr.type"
+              [name]="'attr-type-' + i"
+              [attr.disabled]="attr.isAutoId ? '' : null"
+              class="attr-select"
+            >
+              <option value="text">Text</option>
+              <option value="number">Číslo</option>
+              <option value="date">Datum</option>
+              <option value="boolean">Checkbox</option>
+            </select>
           </div>
+
+          <hxt-button (click)="removeAttribute(i)" appearance="flat" severity="danger" class="remove-btn">❌</hxt-button>
         </div>
 
-        <div class="cdk-drag-placeholder-spacer" *cdkDragPlaceholder></div>
+        <!-- Příznaky -->
+        <div class="attribute-flags">
+          <label class="attr-flag-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="attr.isAutoId"
+              [name]="'attr-autoid-' + i"
+              (ngModelChange)="onAutoIdChange(attr)"
+            />
+            🔢 Auto ID
+          </label>
+          <label class="attr-flag-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="attr.isCreatedAt"
+              [name]="'attr-createdat-' + i"
+              (ngModelChange)="onCreatedAtChange(attr)"
+            />
+            🕒 Datum a čas vytvoření
+          </label>
+        </div>
+
+        <div *cdkDragPlaceholder class="attribute-placeholder"></div>
       </div>
     }
   </div>
 
-  <span class="form-action-buttons-bottom">
+  <div class="form-action-buttons-bottom">
     <hxt-button (click)="addAttribute()">➕ Přidat atribut</hxt-button>
     <hxt-button [type]="'submit'" [disabled]="!name">💾 Uložit typ člena</hxt-button>
-  </span>
+  </div>
 </form>
