@@ -1,146 +1,161 @@
 <div class="table-wrapper">
   @let selectedTypeVar = selectedType();
-  @let colAttrs = columnOrder();
+  @let colAttrs = visibleColumns();
+  @let allAttrs = columnOrder();
+
   @if (selectedTypeVar) {
-    <h1>{{selectedTypeVar.name}}</h1>
+    <h1>{{ selectedTypeVar.name }}</h1>
   }
+
   @if (selectedTypeVar && members().length > 0 && !loading()) {
-    <hxt-button
-      [disabled]="paginatedMembers().length == 0"
-      (click)="exportToPdf(selectedTypeVar)"
-    >
+    <hxt-button [disabled]="paginatedMembers().length == 0" (click)="exportToPdf(selectedTypeVar)">
       Exportovat do PDF
     </hxt-button>
 
-    <table>
-      <!-- Filter row -->
-      <tr class="filter-row">
-        @for (attr of colAttrs; track attr.id) {
-          <th>
-            @if (attr.type === 'boolean' && !isAutoFilled(attr)) {
-              <hxt-tristate-toggle-switch
-                #booleanToggleFilter
-                [label]="{onLabel: 'Ano', offLabel: 'Ne', indeterminateLabel: 'Vše'}"
-                (stateChangeBoolean)="updateFilter(attr.name, $event)"
-              >
-              </hxt-tristate-toggle-switch>
-            } @else if (attr.type === 'text' && !isAutoFilled(attr)) {
-              <input
-                type="text"
-                [(ngModel)]="filters()[attr.name]"
-                (ngModelChange)="updateFilter(attr.name, $event)"
-              />
-            } @else if (attr.type === 'number' && !isAutoFilled(attr)) {
-              <input
-                type="number"
-                [(ngModel)]="filters()[attr.name]"
-                (ngModelChange)="updateFilter(attr.name, $event)"
-              />
-            } @else if (attr.type === 'date' && !isAutoFilled(attr)) {
-              <input
-                type="date"
-                [(ngModel)]="filters()[attr.name]"
-                (ngModelChange)="updateFilter(attr.name, $event)"
-              />
-            }
-          </th>
-        }
-        <th><hxt-button (click)="resetFilters()" severity="secondary">Resetovat filtry</hxt-button></th>
-      </tr>
-
-      <!-- Header row – drag to reorder columns -->
-      <thead>
-        <tr
-          cdkDropList
-          cdkDropListOrientation="horizontal"
-          (cdkDropListDropped)="dropColumn($event)"
-          class="header-row"
-        >
+    <div class="table-scroll-wrapper">
+      <table>
+        <!-- Filter row -->
+        <tr class="filter-row">
           @for (attr of colAttrs; track attr.id) {
-            <th cdkDrag cdkDragLockAxis="x" class="draggable-header" title="Přetáhni pro změnu pořadí">
-              <span class="header-label">{{ attr.name }}</span>
-              @if (attr.isAutoId) {
-                <span class="attr-badge">🔢</span>
+            <th>
+              @if (attr.type === 'boolean' && !isAutoFilled(attr)) {
+                <hxt-tristate-toggle-switch
+                  #booleanToggleFilter
+                  [label]="{onLabel: 'Ano', offLabel: 'Ne', indeterminateLabel: 'Vše'}"
+                  (stateChangeBoolean)="updateFilter(attr.name, $event)"
+                />
+              } @else if ((attr.type === 'text' || attr.type === 'multi-select') && !isAutoFilled(attr)) {
+                <input type="text" [(ngModel)]="filters()[attr.name]" (ngModelChange)="updateFilter(attr.name, $event)" />
+              } @else if (attr.type === 'number' && !isAutoFilled(attr)) {
+                <input type="number" [(ngModel)]="filters()[attr.name]" (ngModelChange)="updateFilter(attr.name, $event)" />
+              } @else if (attr.type === 'date' && !isAutoFilled(attr)) {
+                <input type="date" [(ngModel)]="filters()[attr.name]" (ngModelChange)="updateFilter(attr.name, $event)" />
+              } @else if (attr.type === 'single-select') {
+                <select [(ngModel)]="filters()[attr.name]" (ngModelChange)="updateFilter(attr.name, $event)">
+                  <option value="">Vše</option>
+                  @for (opt of attr.options || []; track opt) {
+                    <option [value]="opt">{{ opt }}</option>
+                  }
+                </select>
               }
-              @if (attr.isCreatedAt) {
-                <span class="attr-badge">🕒</span>
-              }
-              <span class="drag-indicator">⠿</span>
-              <div *cdkDragPlaceholder class="column-drag-placeholder"></div>
             </th>
           }
-          <th>Akce</th>
+          <th class="sticky-col sticky-col--header">
+            <hxt-button (click)="resetFilters()" severity="secondary">Resetovat filtry</hxt-button>
+          </th>
         </tr>
-      </thead>
 
-      <tbody>
-        @for (member of paginatedMembers(); track $index) {
-          <tr class="table-row">
-            @if (editId === member.id) {
-              @for (attr of colAttrs; track attr.id) {
-                <td>
-                  @if (isAutoFilled(attr)) {
-                    <span class="autofilled-value">{{ member.data[attr.name] }}</span>
-                  } @else {
-                    @switch (attr.type) {
-                      @case ('text') {
-                        <input type="text" [(ngModel)]="editableMember[attr.name]" />
-                      }
-                      @case ('number') {
-                        <input type="number" [(ngModel)]="editableMember[attr.name]" />
-                      }
-                      @case ('date') {
-                        <input type="date" [(ngModel)]="editableMember[attr.name]" />
-                      }
-                      @case ('boolean') {
-                        <input type="checkbox" [(ngModel)]="editableMember[attr.name]" />
-                      }
-                      @default {
-                        <input type="text" [(ngModel)]="editableMember[attr.name]" />
+        <!-- Header row – drag to reorder -->
+        <thead>
+          <tr
+            cdkDropList
+            cdkDropListOrientation="horizontal"
+            (cdkDropListDropped)="dropColumn($event)"
+            class="header-row"
+          >
+            @for (attr of colAttrs; track attr.id) {
+              <th cdkDrag cdkDragLockAxis="x" class="draggable-header" title="Přetáhni pro změnu pořadí">
+                <span class="header-label">{{ attr.name }}</span>
+                @if (attr.isAutoId) { <span class="attr-badge">🔢</span> }
+                @if (attr.isCreatedAt) { <span class="attr-badge">🕒</span> }
+                <span class="drag-indicator">⠿</span>
+                <div *cdkDragPlaceholder class="column-drag-placeholder"></div>
+              </th>
+            }
+            <th class="sticky-col sticky-col--header">Akce</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (member of paginatedMembers(); track member.id) {
+            <tr
+              class="table-row"
+              [class.row-clickable]="editId !== member.id"
+              (click)="editId !== member.id ? openDetail(member) : null"
+            >
+              @if (editId === member.id) {
+                @for (attr of colAttrs; track attr.id) {
+                  <td>
+                    @if (isAutoFilled(attr)) {
+                      <span class="autofilled-value">{{ member.data[attr.name] }}</span>
+                    } @else {
+                      @switch (attr.type) {
+                        @case ('text') { <input type="text" [(ngModel)]="editableMember[attr.name]" /> }
+                        @case ('number') { <input type="number" [(ngModel)]="editableMember[attr.name]" /> }
+                        @case ('date') { <input type="date" [(ngModel)]="editableMember[attr.name]" /> }
+                        @case ('boolean') { <input type="checkbox" [(ngModel)]="editableMember[attr.name]" /> }
+                        @case ('single-select') {
+                          <select [(ngModel)]="editableMember[attr.name]">
+                            <option value="">-- Vyberte --</option>
+                            @for (opt of attr.options || []; track opt) {
+                              <option [value]="opt">{{ opt }}</option>
+                            }
+                          </select>
+                        }
+                        @case ('multi-select') {
+                          <div class="multi-select-edit">
+                            @for (opt of attr.options || []; track opt) {
+                              <label class="multi-opt-label">
+                                <input type="checkbox"
+                                  [checked]="isOptionSelected(editableMember, attr.name, opt)"
+                                  (change)="toggleOptionInData(editableMember, attr.name, opt, $event)"
+                                />{{ opt }}
+                              </label>
+                            }
+                          </div>
+                        }
+                        @default { <input type="text" [(ngModel)]="editableMember[attr.name]" /> }
                       }
                     }
-                  }
+                  </td>
+                }
+                <td class="sticky-col sticky-col--body" (click)="$event.stopPropagation()">
+                  <span class="table-action-buttons">
+                    <hxt-button (click)="saveEdit(member.id)">💾 Uložit</hxt-button>
+                    <hxt-button (click)="cancelEdit()">✖ Zrušit</hxt-button>
+                  </span>
+                </td>
+              } @else {
+                @for (attr of colAttrs; track attr.id) {
+                  <td>
+                    @if (attr.type === 'boolean' && !isAutoFilled(attr)) {
+                      <input type="checkbox" class="prevent-checkbox-click" [checked]="member.data[attr.name]" />
+                    } @else if (attr.isCreatedAt) {
+                      {{ displayValue(attr, member.data[attr.name]) }}
+                    } @else if (attr.type === 'date') {
+                      {{ member.data[attr.name] | date: 'dd.MM.yyyy' }}
+                    } @else if (attr.type === 'multi-select') {
+                      <span class="multi-select-display">
+                        @let vals = member.data[attr.name];
+                        @if (vals && vals.length) {
+                          @for (v of vals; track v; let last = $last) {
+                            <span class="multi-badge">{{ v }}</span>
+                          }
+                        } @else { — }
+                      </span>
+                    } @else {
+                      {{ member.data[attr.name] ?? '—' }}
+                    }
+                  </td>
+                }
+                <td class="sticky-col sticky-col--body" (click)="$event.stopPropagation()">
+                  <span class="table-action-buttons">
+                    <hxt-button (click)="editMember(member)">✏️ Upravit</hxt-button>
+                    <hxt-button (click)="deleteMember(member.id)">🗑️ Smazat</hxt-button>
+                  </span>
                 </td>
               }
-              <td>
-                <span class="table-action-buttons">
-                  <hxt-button (click)="saveEdit(member.id)">💾 Uložit</hxt-button>
-                  <hxt-button (click)="cancelEdit()">✖ Zrušit</hxt-button>
-                </span>
-              </td>
-            } @else {
-              @for (attr of colAttrs; track attr.id) {
-                <td>
-                  @if (attr.type === 'boolean' && !isAutoFilled(attr)) {
-                    <input
-                      type="checkbox"
-                      class="prevent-checkbox-click"
-                      [checked]="member.data[attr.name]"
-                    />
-                  } @else if (attr.isCreatedAt) {
-                    {{ formatCellValue(attr, member.data[attr.name]) }}
-                  } @else if (attr.type === 'date') {
-                    {{ member.data[attr.name] | date: 'dd.MM.yyyy' }}
-                  } @else {
-                    {{ member.data[attr.name] }}
-                  }
-                </td>
-              }
-              <td>
-                <span class="table-action-buttons">
-                  <hxt-button (click)="editMember(member)">✏️ Upravit</hxt-button>
-                  <hxt-button (click)="deleteMember(member.id)">🗑️ Smazat</hxt-button>
-                </span>
-              </td>
-            }
-          </tr>
-        }
-      </tbody>
-    </table>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
+
   @if (paginatedMembers().length === 0 && !loading()) {
     <img [src]="'assets/EmptyStateWText.svg'" class="emptyBackground" alt="empty">
   }
+
   <div class="table-footer">
     <span class="select-wrapper">
       <select [(ngModel)]="pageSize">
@@ -152,31 +167,84 @@
         <option [value]="100">100</option>
       </select>
     </span>
-
     @if (totalPages() > 1) {
       <div class="pagination-controls">
         <hxt-button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" appearance="outline">◀️</hxt-button>
-
         @for (page of [].constructor(totalPages()); let i = $index; track i) {
-          <hxt-button
-            appearance="flat"
-            [disabled]="currentPage() === i + 1"
-            (click)="goToPage(i + 1)">
-            {{ i + 1 }}
-          </hxt-button>
+          <hxt-button appearance="flat" [disabled]="currentPage() === i + 1" (click)="goToPage(i + 1)">{{ i + 1 }}</hxt-button>
         }
-
-        <hxt-button
-          (click)="goToPage(currentPage() + 1)"
-          [disabled]="currentPage() === totalPages()"
-          appearance="outline"
-        >
-          ▶️
-        </hxt-button>
+        <hxt-button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" appearance="outline">▶️</hxt-button>
       </div>
     }
   </div>
 </div>
-@if (loading()) {
-  <hxt-loading-spinner></hxt-loading-spinner>
+
+@if (loading()) { <hxt-loading-spinner /> }
+
+<!-- ── Detail overlay ── -->
+@if (detailMember()) {
+  @let dm = detailMember()!;
+  @let allAttrsList = columnOrder();
+
+  <div class="detail-overlay" (click)="closeDetail()">
+    <div class="detail-panel" (click)="$event.stopPropagation()">
+
+      <div class="detail-header">
+        <span class="detail-title">{{ overlayEditMode ? 'Upravit záznam' : 'Detail záznamu' }}</span>
+        <button class="detail-close" (click)="closeDetail()" title="Zavřít">×</button>
+      </div>
+
+      <div class="detail-body">
+        @for (attr of allAttrsList; track attr.id) {
+          <div class="detail-field" [class.detail-field--hidden]="attr.visible === false">
+            <span class="detail-label">
+              {{ attr.name }}
+              @if (attr.visible === false) { <span class="hidden-badge" title="Skryto v tabulce">🙈</span> }
+            </span>
+
+            @if (overlayEditMode && !isAutoFilled(attr)) {
+              <!-- Edit inputs -->
+              @switch (attr.type) {
+                @case ('text') { <input type="text" class="detail-input" [(ngModel)]="overlayEditData[attr.name]" [name]="'oe-' + attr.id" /> }
+                @case ('number') { <input type="number" class="detail-input" [(ngModel)]="overlayEditData[attr.name]" [name]="'oe-' + attr.id" /> }
+                @case ('date') { <input type="date" class="detail-input" [(ngModel)]="overlayEditData[attr.name]" [name]="'oe-' + attr.id" /> }
+                @case ('boolean') { <input type="checkbox" [(ngModel)]="overlayEditData[attr.name]" [name]="'oe-' + attr.id" /> }
+                @case ('single-select') {
+                  <select class="detail-input" [(ngModel)]="overlayEditData[attr.name]" [name]="'oe-' + attr.id">
+                    <option value="">-- Vyberte --</option>
+                    @for (opt of attr.options || []; track opt) { <option [value]="opt">{{ opt }}</option> }
+                  </select>
+                }
+                @case ('multi-select') {
+                  <div class="multi-select-edit">
+                    @for (opt of attr.options || []; track opt) {
+                      <label class="multi-opt-label">
+                        <input type="checkbox"
+                          [checked]="isOptionSelected(overlayEditData, attr.name, opt)"
+                          (change)="toggleOptionInData(overlayEditData, attr.name, opt, $event)"
+                        />{{ opt }}
+                      </label>
+                    }
+                  </div>
+                }
+              }
+            } @else {
+              <!-- View -->
+              <span class="detail-value">{{ displayValue(attr, dm.data[attr.name]) }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="detail-footer">
+        @if (overlayEditMode) {
+          <hxt-button (click)="saveOverlayEdit(dm.id)">💾 Uložit</hxt-button>
+          <hxt-button (click)="cancelOverlayEdit()" appearance="outline">✕ Zrušit</hxt-button>
+        } @else {
+          <hxt-button (click)="startOverlayEdit(dm)">✏️ Upravit</hxt-button>
+          <hxt-button (click)="deleteFromDetail(dm.id)" severity="danger">🗑️ Smazat</hxt-button>
+        }
+      </div>
+    </div>
+  </div>
 }

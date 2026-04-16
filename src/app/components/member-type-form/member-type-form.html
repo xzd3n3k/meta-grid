@@ -13,7 +13,7 @@
     @for (attr of attributes; let i = $index; track attr.id) {
       <div class="attribute-card" cdkDrag>
 
-        <!-- Hlavní řádek: drag handle | Název | Typ | smazat -->
+        <!-- Hlavní řádek -->
         <div class="attribute-card-main">
           <span class="drag-handle" cdkDragHandle title="Přetáhni pro změnu pořadí">⠿</span>
 
@@ -36,17 +36,49 @@
               [(ngModel)]="attr.type"
               [name]="'attr-type-' + i"
               [attr.disabled]="attr.isAutoId ? '' : null"
+              (ngModelChange)="onAttrTypeChange(attr)"
               class="attr-select"
             >
               <option value="text">Text</option>
               <option value="number">Číslo</option>
               <option value="date">Datum</option>
               <option value="boolean">Checkbox</option>
+              <option value="single-select">Výběr jedné možnosti</option>
+              <option value="multi-select">Výběr více možností</option>
             </select>
           </div>
 
           <hxt-button (click)="removeAttribute(i)" appearance="flat" severity="danger" class="remove-btn">❌</hxt-button>
         </div>
+
+        <!-- Možnosti pro select typy -->
+        @if (isSelectType(attr)) {
+          <div class="options-section">
+            <span class="options-title">Možnosti výběru</span>
+            <div class="options-list">
+              @for (opt of (attr.options || []); let j = $index; track j) {
+                <div class="option-row">
+                  <input
+                    type="text"
+                    [(ngModel)]="attr.options![j]"
+                    [name]="'attr-opt-' + i + '-' + j"
+                    placeholder="Možnost {{ j + 1 }}"
+                    class="attr-input option-input"
+                  />
+                  <button
+                    type="button"
+                    (click)="removeOption(attr, j)"
+                    class="option-remove-btn"
+                    title="Odebrat možnost"
+                  >✕</button>
+                </div>
+              }
+            </div>
+            <button type="button" (click)="addOption(attr)" class="option-add-btn">
+              + Přidat možnost
+            </button>
+          </div>
+        }
 
         <!-- Příznaky -->
         <div class="attribute-flags">
@@ -66,7 +98,15 @@
               [name]="'attr-createdat-' + i"
               (ngModelChange)="onCreatedAtChange(attr)"
             />
-            🕒 Datum a čas vytvoření
+            🕒 Datum vytvoření
+          </label>
+          <label class="attr-flag-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="attr.visible"
+              [name]="'attr-visible-' + i"
+            />
+            👁️ Viditelný v tabulce
           </label>
         </div>
 

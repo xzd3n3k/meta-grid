@@ -1,9 +1,8 @@
-import {Component, OnInit, inject, signal, effect, viewChild, viewChildren, computed, model} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, inject, signal, effect, viewChildren, computed, model} from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {MemberService} from '../../shared/member.service';
-
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {ActivatedRoute} from '@angular/router';
@@ -14,7 +13,6 @@ import {Button} from '../button/button';
 import {LoadingSpinner} from '../loading-spinner/loading-spinner';
 import {TriState, TristateToggleSwitch} from '../tristate-toggle-switch/tristate-toggle-switch';
 
-type FilterType = 'text' | 'number' | 'date' | 'boolean';
 type FilterValue = string | number | boolean | Date | null;
 
 @Component({
@@ -31,16 +29,20 @@ export class MemberTable {
   protected editId: string | null = null;
   protected editableMember: Record<string, any> = {};
 
+  // Detail overlay
+  protected readonly detailMember = signal<any | null>(null);
+  protected overlayEditMode = false;
+  protected overlayEditData: Record<string, any> = {};
+
   private readonly toggleSwitches = viewChildren(TristateToggleSwitch);
 
   protected readonly selectedType = signal<MemberType | null>(null);
   protected readonly members = signal<any[]>([]);
-  protected readonly filters = signal<{ [attributeName: string]: FilterValue }>({});
+  protected readonly filters = signal<{ [key: string]: FilterValue }>({});
   protected readonly loading = signal(false);
   protected readonly currentPage = signal(1);
   protected readonly pageSize = model(5);
 
-  /** Local column order — initialized from selectedType, reordered by drag-drop and saved to Firestore */
   protected readonly columnOrder = signal<MemberAttribute[]>([]);
   private lastLoadedTypeId: string | null = null;
 
@@ -51,6 +53,11 @@ export class MemberTable {
       this.columnOrder.set([...type.attributes]);
     }
   });
+
+  /** Columns shown in the table (visible !== false) */
+  protected readonly visibleColumns = computed(() =>
+    this.columnOrder().filter(a => a.visible !== false)
+  );
 
   protected readonly paginatedMembers = computed(() => {
     const members = this.filteredMembers();
@@ -66,9 +73,7 @@ export class MemberTable {
 
   protected goToPage(page: number): void {
     const total = this.totalPages();
-    if (page >= 1 && page <= total) {
-      this.currentPage.set(page);
-    }
+    if (page >= 1 && page <= total) this.currentPage.set(page);
   }
 
   private readonly memberTypeId = toSignal(
@@ -82,7 +87,6 @@ export class MemberTable {
       this.memberTypeService.get(memberTypeId).subscribe(memberType => {
         this.selectedType.set(memberType);
       });
-
       this.memberService.getByType(memberTypeId).subscribe(data => {
         this.members.set(data);
         this.loading.set(false);
@@ -94,11 +98,8 @@ export class MemberTable {
     const attrs = [...this.columnOrder()];
     moveItemInArray(attrs, event.previousIndex, event.currentIndex);
     this.columnOrder.set(attrs);
-
     const typeId = this.memberTypeId();
-    if (typeId) {
-      this.memberTypeService.update(typeId, { attributes: attrs } as any).subscribe();
-    }
+    if (typeId) this.memberTypeService.update(typeId, { attributes: attrs } as any).subscribe();
   }
 
   public resetFilters(): void {
@@ -112,14 +113,6 @@ export class MemberTable {
     this.currentPage.set(1);
   }
 
-  protected clearFilter(attrName: string): void {
-    this.filters.update(f => {
-      const updated = { ...f };
-      delete updated[attrName];
-      return updated;
-    });
-  }
-
   protected readonly filteredMembers = computed(() => {
     const selectedType = this.selectedType();
     const filters = this.filters();
@@ -128,11 +121,9 @@ export class MemberTable {
     return members.filter(member => {
       return Object.entries(filters).every(([key, filterValue]) => {
         if (filterValue === null || filterValue === '' || filterValue === undefined) return true;
-
         const memberValue = member.data[key];
         if (memberValue === null || memberValue === undefined) return false;
-
-        const attribute = selectedType?.attributes.find(attr => attr.name === key);
+        const attribute = selectedType?.attributes.find(a => a.name === key);
         if (!attribute) return true;
 
         switch (attribute.type) {
@@ -142,10 +133,13 @@ export class MemberTable {
             return Number(memberValue) === Number(filterValue);
           case 'boolean':
             return memberValue === filterValue;
+          case 'single-select':
+            return memberValue === filterValue;
+          case 'multi-select':
+            return Array.isArray(memberValue) &&
+              memberValue.some(v => String(v).toLowerCase().includes((filterValue as string).toLowerCase()));
           case 'date':
-            const memberDate = new Date(memberValue);
-            const filterDate = new Date(filterValue as Date);
-            return memberDate.toDateString() === filterDate.toDateString();
+            return new Date(memberValue).toDateString() === new Date(filterValue as Date).toDateString();
           default:
             return true;
         }
@@ -155,7 +149,7 @@ export class MemberTable {
 
   protected editMember(member: any) {
     this.editId = member.id;
-    this.editableMember = {...member.data};
+    this.editableMember = { ...member.data };
   }
 
   protected cancelEdit() {
@@ -165,59 +159,110 @@ export class MemberTable {
 
   protected saveEdit(id: string) {
     this.memberService.update(id, this.editableMember).subscribe(() => {
-      this.members.update(members =>
-        members.map(member =>
-          member.id === id ? { ...member, data: { ...this.editableMember } } : member
-        )
-      );
+      this.members.update(ms => ms.map(m => m.id === id ? { ...m, data: { ...this.editableMember } } : m));
       this.cancelEdit();
     });
   }
 
   protected deleteMember(id: string) {
-    if (confirm('Opravdu chcete smazat tohoto člena?')) {
+    if (confirm('Opravdu chcete smazat tento záznam?')) {
       this.memberService.delete(id).subscribe(() => {
-        this.members.update(members => members.filter(m => m.id !== id));
+        this.members.update(ms => ms.filter(m => m.id !== id));
       });
     }
   }
+
+  // ── Detail overlay ────────────────────────────────────────────────
+
+  protected openDetail(member: any) {
+    this.detailMember.set(member);
+    this.overlayEditMode = false;
+    this.overlayEditData = {};
+  }
+
+  protected closeDetail() {
+    this.detailMember.set(null);
+    this.overlayEditMode = false;
+    this.overlayEditData = {};
+  }
+
+  protected startOverlayEdit(member: any) {
+    this.overlayEditData = { ...member.data };
+    this.overlayEditMode = true;
+  }
+
+  protected cancelOverlayEdit() {
+    this.overlayEditMode = false;
+    this.overlayEditData = {};
+  }
+
+  protected saveOverlayEdit(memberId: string) {
+    this.memberService.update(memberId, this.overlayEditData).subscribe(() => {
+      const updated = { ...this.detailMember()!, data: { ...this.overlayEditData } };
+      this.members.update(ms => ms.map(m => m.id === memberId ? updated : m));
+      this.detailMember.set(updated);
+      this.overlayEditMode = false;
+    });
+  }
+
+  protected deleteFromDetail(memberId: string) {
+    if (confirm('Opravdu chcete smazat tento záznam?')) {
+      this.memberService.delete(memberId).subscribe(() => {
+        this.members.update(ms => ms.filter(m => m.id !== memberId));
+        this.closeDetail();
+      });
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────
 
   protected isAutoFilled(attr: MemberAttribute): boolean {
     return !!attr.isAutoId || !!attr.isCreatedAt;
   }
 
-  protected formatCellValue(attr: MemberAttribute, value: any): string {
-    if (value == null) return '';
+  protected isOptionSelected(data: Record<string, any>, attrName: string, option: string): boolean {
+    const val = data[attrName];
+    return Array.isArray(val) && val.includes(option);
+  }
+
+  protected toggleOptionInData(data: Record<string, any>, attrName: string, option: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const current: string[] = Array.isArray(data[attrName]) ? [...data[attrName]] : [];
+    data[attrName] = checked ? [...current, option] : current.filter(o => o !== option);
+  }
+
+  protected displayValue(attr: MemberAttribute, value: any): string {
+    if (value == null || value === '') return '—';
     if (attr.isCreatedAt) {
       const d = new Date(value);
-      return isNaN(d.getTime()) ? value : d.toLocaleString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return isNaN(d.getTime()) ? value : d.toLocaleString('cs-CZ', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
     }
-    return value;
+    if (attr.type === 'date') {
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? value : d.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    if (attr.type === 'boolean') return value ? 'Ano' : 'Ne';
+    if (attr.type === 'multi-select') return Array.isArray(value) ? value.join(', ') || '—' : '—';
+    return String(value);
   }
 
   protected exportToPdf(selectedType?: MemberType | null) {
     if (!selectedType) return;
-
-    const doc = new jsPDF();
-    const columns = this.columnOrder().map(attr => attr.name);
-    const rows = this.filteredMembers().map(member =>
-      this.columnOrder().map(attr => member.data[attr.name] ?? '')
+    const cols = this.visibleColumns().map(a => a.name);
+    const rows = this.filteredMembers().map(m =>
+      this.visibleColumns().map(a => this.displayValue(a, m.data[a.name]))
     );
-
+    const doc = new jsPDF();
     autoTable(doc, {
-      head: [columns],
-      body: rows,
-      theme: 'grid',
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [22, 160, 133] },
+      head: [cols], body: rows, theme: 'grid',
+      styles: { fontSize: 10 }, headStyles: { fillColor: [22, 160, 133] },
     });
-
     doc.save(`${selectedType.name}_clenove.pdf`);
   }
 
   private resetToggleFilters() {
-    this.toggleSwitches().forEach(toggle => {
-      toggle.setState('indeterminate');
-    });
+    this.toggleSwitches().forEach(t => t.setState('indeterminate'));
   }
 }

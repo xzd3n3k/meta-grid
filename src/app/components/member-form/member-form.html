@@ -4,11 +4,9 @@
   <hxt-form-field label="Vyber typ člena:">
     <select [(ngModel)]="selectedTypeId" (change)="onTypeChange()">
       <option [value]="''" disabled>-- Vyber --</option>
-
       @for (memberType of memberTypes; track memberType.id) {
         <option [value]="memberType.id">{{ memberType.name }}</option>
       }
-
     </select>
   </hxt-form-field>
 
@@ -18,33 +16,52 @@
       @for (attr of selectedType.attributes; track $index) {
         @if (!isAutoFilled(attr)) {
           <div>
-            <hxt-form-field [label]="attr.name">
-              @if (attr.type === 'text') {
-                <input
-                  type="text"
-                  [(ngModel)]="formData[attr.name]"
-                  [name]="attr.name"
-                />
-              } @else if (attr.type === 'number') {
-                <input
-                  type="number"
-                  [(ngModel)]="formData[attr.name]"
-                  [name]="attr.name"
-                />
-              } @else if (attr.type === 'date') {
-                <input
-                  type="date"
-                  [(ngModel)]="formData[attr.name]"
-                  [name]="attr.name"
-                />
-              } @else if (attr.type === 'boolean') {
-                <input
-                  type="checkbox"
-                  [(ngModel)]="formData[attr.name]"
-                  [name]="attr.name"
-                />
-              }
-            </hxt-form-field>
+            @if (attr.type === 'multi-select') {
+              <!-- Multi-select: checkboxes without hxt-form-field wrapper -->
+              <div class="multi-select-field">
+                <span class="multi-select-label">{{ attr.name }}</span>
+                <div class="multi-select-options">
+                  @for (opt of attr.options || []; track opt) {
+                    <label class="multi-select-option">
+                      <input
+                        type="checkbox"
+                        [checked]="isOptionSelected(attr.name, opt)"
+                        (change)="toggleOption(attr.name, opt, $event)"
+                      />
+                      {{ opt }}
+                    </label>
+                  }
+                  @if (!attr.options?.length) {
+                    <span class="no-options">Žádné možnosti nejsou definovány</span>
+                  }
+                </div>
+              </div>
+            } @else if (attr.type === 'single-select') {
+              <hxt-form-field [label]="attr.name">
+                <select [(ngModel)]="formData[attr.name]" [name]="attr.name">
+                  <option value="">-- Vyberte --</option>
+                  @for (opt of attr.options || []; track opt) {
+                    <option [value]="opt">{{ opt }}</option>
+                  }
+                </select>
+              </hxt-form-field>
+            } @else if (attr.type === 'text') {
+              <hxt-form-field [label]="attr.name">
+                <input type="text" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
+              </hxt-form-field>
+            } @else if (attr.type === 'number') {
+              <hxt-form-field [label]="attr.name">
+                <input type="number" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
+              </hxt-form-field>
+            } @else if (attr.type === 'date') {
+              <hxt-form-field [label]="attr.name">
+                <input type="date" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
+              </hxt-form-field>
+            } @else if (attr.type === 'boolean') {
+              <hxt-form-field [label]="attr.name">
+                <input type="checkbox" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
+              </hxt-form-field>
+            }
           </div>
         }
       }

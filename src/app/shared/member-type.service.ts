@@ -18,9 +18,11 @@ import {AuthService} from './auth.service';
 export interface MemberAttribute {
   id: string;
   name: string;
-  type: 'text' | 'number' | 'date' | 'boolean';
+  type: 'text' | 'number' | 'date' | 'boolean' | 'single-select' | 'multi-select';
   isAutoId?: boolean;
   isCreatedAt?: boolean;
+  options?: string[];
+  visible?: boolean;
 }
 
 export interface MemberType extends MemberTypeInit {

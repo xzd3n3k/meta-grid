@@ -30,11 +30,19 @@ export class MemberTypeForm {
   protected name = '';
   protected attributes: MemberAttribute[] = [];
 
+  protected isSelectType(attr: MemberAttribute): boolean {
+    return attr.type === 'single-select' || attr.type === 'multi-select';
+  }
+
   private readonly setFormData = effect(() => {
     const memberType = this.memberType();
     if (memberType) {
       this.name = memberType.name;
-      this.attributes = memberType.attributes.map(attr => ({ ...attr }));
+      this.attributes = memberType.attributes.map(attr => ({
+        ...attr,
+        visible: attr.visible ?? true,
+        options: attr.options ? [...attr.options] : [],
+      }));
     }
   });
 
@@ -42,7 +50,11 @@ export class MemberTypeForm {
     const memberType = this.memberType();
     if (memberType) {
       this.name = memberType.name;
-      this.attributes = memberType.attributes.map(attr => ({ ...attr }));
+      this.attributes = memberType.attributes.map(attr => ({
+        ...attr,
+        visible: attr.visible ?? true,
+        options: attr.options ? [...attr.options] : [],
+      }));
       return;
     }
     this.name = '';
@@ -50,7 +62,13 @@ export class MemberTypeForm {
   }
 
   protected addAttribute() {
-    this.attributes.push({ id: crypto.randomUUID(), name: '', type: 'text' });
+    this.attributes.push({
+      id: crypto.randomUUID(),
+      name: '',
+      type: 'text',
+      visible: true,
+      options: [],
+    });
   }
 
   protected removeAttribute(index: number) {
@@ -59,6 +77,12 @@ export class MemberTypeForm {
 
   protected drop(event: CdkDragDrop<MemberAttribute[]>) {
     moveItemInArray(this.attributes, event.previousIndex, event.currentIndex);
+  }
+
+  protected onAttrTypeChange(attr: MemberAttribute) {
+    if (this.isSelectType(attr) && !attr.options?.length) {
+      attr.options = [];
+    }
   }
 
   protected onAutoIdChange(attr: MemberAttribute) {
@@ -78,9 +102,22 @@ export class MemberTypeForm {
     }
   }
 
+  protected addOption(attr: MemberAttribute) {
+    if (!attr.options) attr.options = [];
+    attr.options.push('');
+  }
+
+  protected removeOption(attr: MemberAttribute, index: number) {
+    attr.options?.splice(index, 1);
+  }
+
   protected submit() {
     if (!this.name || this.attributes.some(attr => !attr.name || !attr.type)) {
       alert('Vyplň název a všechny atributy!');
+      return;
+    }
+    if (this.attributes.some(a => this.isSelectType(a) && (!a.options || a.options.length === 0))) {
+      alert('Výběrové atributy musí mít alespoň jednu možnost!');
       return;
     }
 
@@ -93,14 +130,8 @@ export class MemberTypeForm {
 
     if (!memberTypeId) {
       this.memberTypeService.create(memberType).subscribe({
-        next: () => {
-          this.resetForm();
-          this.submittedSuccessfully.emit();
-        },
-        error: err => {
-          console.error('Error creating member type:', err);
-          alert('Něco se pokazilo při ukládání!');
-        }
+        next: () => { this.resetForm(); this.submittedSuccessfully.emit(); },
+        error: err => { console.error(err); alert('Něco se pokazilo při ukládání!'); }
       });
       return;
     }
@@ -109,10 +140,9 @@ export class MemberTypeForm {
 
     if (memberTypeAttrsOriginal) {
       const originalMap = new Map(memberTypeAttrsOriginal.map(attr => {
-        if (!this.attributes.find(attribute => attribute.id === attr.id)) {
+        if (!this.attributes.find(a => a.id === attr.id)) {
           this.memberService.removeAttributeFromMembers(memberTypeId, attr.name).subscribe({
-            next: () => {},
-            error: err => { console.error('Error updating member type:', err); }
+            error: err => console.error(err)
           });
         }
         return [attr.id, attr.name];
@@ -122,27 +152,26 @@ export class MemberTypeForm {
         const originalName = originalMap.get(attr.id);
         if (originalName != undefined && originalName !== attr.name) {
           this.memberService.renameAttributeInMembers(memberTypeId, originalName, attr.name).subscribe({
-            next: () => {},
-            error: err => { console.error('Error updating member type:', err); }
+            error: err => console.error(err)
           });
-        } else if (!originalName && attr.type === 'boolean') {
-          this.memberService.addAttributeToAllMembers(memberTypeId, attr.name, false).subscribe({
-            next: () => {},
-            error: err => { console.error('Error adding attribute to members:', err); }
-          });
+        } else if (!originalName) {
+          let defaultValue: any = null;
+          if (attr.type === 'boolean') defaultValue = false;
+          else if (attr.type === 'multi-select') defaultValue = [];
+          else if (attr.type === 'single-select') defaultValue = '';
+
+          if (defaultValue !== null || attr.type === 'single-select') {
+            this.memberService.addAttributeToAllMembers(memberTypeId, attr.name, defaultValue).subscribe({
+              error: err => console.error(err)
+            });
+          }
         }
       });
     }
 
     this.memberTypeService.update(memberTypeId, memberType).subscribe({
-      next: () => {
-        this.resetForm();
-        this.submittedSuccessfully.emit();
-      },
-      error: err => {
-        console.error('Error updating member type:', err);
-        alert('Něco se pokazilo při ukládání!');
-      }
+      next: () => { this.resetForm(); this.submittedSuccessfully.emit(); },
+      error: err => { console.error(err); alert('Něco se pokazilo při ukládání!'); }
     });
   }
 }

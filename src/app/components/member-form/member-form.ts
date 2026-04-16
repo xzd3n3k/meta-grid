@@ -7,7 +7,6 @@ import {MemberService} from '../../shared/member.service';
 import {FormField} from '../form-field/form-field';
 import {Button} from '../button/button';
 
-
 @Component({
   selector: 'hxt-member-form',
   imports: [CommonModule, FormsModule, FormField, Button],
@@ -21,7 +20,6 @@ export class MemberForm implements OnInit {
   protected memberTypes: MemberType[] = [];
   protected selectedTypeId = '';
   protected selectedType: MemberType | null = null;
-
   protected formData: Record<string, any> = {};
 
   ngOnInit() {
@@ -43,13 +41,23 @@ export class MemberForm implements OnInit {
     return this.selectedType?.attributes.filter(a => a.isAutoId || a.isCreatedAt) ?? [];
   }
 
+  protected isOptionSelected(attrName: string, option: string): boolean {
+    const val = this.formData[attrName];
+    return Array.isArray(val) && val.includes(option);
+  }
+
+  protected toggleOption(attrName: string, option: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const current: string[] = Array.isArray(this.formData[attrName]) ? [...this.formData[attrName]] : [];
+    this.formData[attrName] = checked ? [...current, option] : current.filter(o => o !== option);
+  }
+
   protected async submit() {
     if (!this.selectedTypeId || !this.selectedType) return;
 
     const autoIdAttr = this.selectedType.attributes.find(a => a.isAutoId);
     const createdAtAttr = this.selectedType.attributes.find(a => a.isCreatedAt);
 
-    // Auto-increment ID
     if (autoIdAttr) {
       const max = await firstValueFrom(
         this.memberService.getMaxAttributeValue(this.selectedTypeId, autoIdAttr.name)
@@ -57,7 +65,6 @@ export class MemberForm implements OnInit {
       this.formData[autoIdAttr.name] = max + 1;
     }
 
-    // Auto created-at timestamp
     if (createdAtAttr) {
       this.formData[createdAtAttr.name] = new Date().toISOString();
     }
@@ -66,25 +73,19 @@ export class MemberForm implements OnInit {
       memberTypeId: this.selectedTypeId,
       data: this.formData,
     }).subscribe({
-      next: () => {
-        this.resetFormData();
-      },
-      error: (error) => {
-        console.error('Chyba při ukládání člena:', error);
-      }
+      next: () => { this.resetFormData(); },
+      error: (error) => { console.error('Chyba při ukládání člena:', error); }
     });
   }
 
   private resetFormData() {
     this.formData = {};
     if (this.selectedType) {
-      for (let attr of this.selectedType.attributes) {
+      for (const attr of this.selectedType.attributes) {
         if (attr.isAutoId || attr.isCreatedAt) continue;
-        if (attr.type === 'boolean') {
-          this.formData[attr.name] = false;
-        } else {
-          this.formData[attr.name] = null;
-        }
+        if (attr.type === 'boolean') this.formData[attr.name] = false;
+        else if (attr.type === 'multi-select') this.formData[attr.name] = [];
+        else this.formData[attr.name] = null;
       }
     }
   }
