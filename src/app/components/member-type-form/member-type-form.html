@@ -7,6 +7,35 @@
     <input type="text" [(ngModel)]="name" name="name" />
   </hxt-form-field>
 
+  <!-- ── Integrace s ARESem ── -->
+  <div class="ares-toggle-section">
+    <label class="ares-toggle-label">
+      <input type="checkbox" [(ngModel)]="aresEnabled" name="aresEnabled" />
+      <span class="ares-toggle-text">
+        🏢 Integrace s ARESem
+        <span class="ares-toggle-hint">— automatické vyplnění firemních údajů podle IČO</span>
+      </span>
+    </label>
+
+    @if (aresEnabled) {
+      <details class="ares-keys-reference">
+        <summary>📋 Dostupné ARES klíče</summary>
+        <div class="ares-keys-grid">
+          <code>ico</code><span>IČO</span>
+          <code>obchodniJmeno</code><span>Obchodní jméno</span>
+          <code>dic</code><span>DIČ</span>
+          <code>sidlo.textovaAdresa</code><span>Celá adresa</span>
+          <code>sidlo.nazevObce</code><span>Město</span>
+          <code>sidlo.nazevUlice</code><span>Ulice</span>
+          <code>sidlo.cisloDomovni</code><span>Číslo popisné</span>
+          <code>sidlo.psc</code><span>PSČ</span>
+          <code>datumVzniku</code><span>Datum vzniku</span>
+          <code>pravniForma</code><span>Kód právní formy</span>
+        </div>
+      </details>
+    }
+  </div>
+
   <h3>Atributy</h3>
 
   <div cdkDropList (cdkDropListDropped)="drop($event)" class="attributes-list">
@@ -65,49 +94,54 @@
                     placeholder="Možnost {{ j + 1 }}"
                     class="attr-input option-input"
                   />
-                  <button
-                    type="button"
-                    (click)="removeOption(attr, j)"
-                    class="option-remove-btn"
-                    title="Odebrat možnost"
-                  >✕</button>
+                  <button type="button" (click)="removeOption(attr, j)" class="option-remove-btn" title="Odebrat">✕</button>
                 </div>
               }
             </div>
-            <button type="button" (click)="addOption(attr)" class="option-add-btn">
-              + Přidat možnost
-            </button>
+            <button type="button" (click)="addOption(attr)" class="option-add-btn">+ Přidat možnost</button>
+          </div>
+        }
+
+        <!-- ARES klíč (pro ne-zdrojové atributy) -->
+        @if (aresEnabled && !attr.isAresSource && !attr.isAutoId && !attr.isCreatedAt) {
+          <div class="ares-key-section">
+            <div class="attr-field">
+              <label class="attr-label ares-key-label" [for]="'attr-areskey-' + i">
+                🏢 ARES klíč
+                <span class="ares-key-hint">(prázdné = nevyplňovat)</span>
+              </label>
+              <input
+                [id]="'attr-areskey-' + i"
+                type="text"
+                [(ngModel)]="attr.aresKey"
+                [name]="'attr-areskey-' + i"
+                placeholder="např. obchodniJmeno nebo sidlo.nazevObce"
+                class="attr-input"
+              />
+            </div>
           </div>
         }
 
         <!-- Příznaky -->
         <div class="attribute-flags">
           <label class="attr-flag-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="attr.isAutoId"
-              [name]="'attr-autoid-' + i"
-              (ngModelChange)="onAutoIdChange(attr)"
-            />
+            <input type="checkbox" [(ngModel)]="attr.isAutoId" [name]="'attr-autoid-' + i" (ngModelChange)="onAutoIdChange(attr)" />
             🔢 Auto ID
           </label>
           <label class="attr-flag-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="attr.isCreatedAt"
-              [name]="'attr-createdat-' + i"
-              (ngModelChange)="onCreatedAtChange(attr)"
-            />
+            <input type="checkbox" [(ngModel)]="attr.isCreatedAt" [name]="'attr-createdat-' + i" (ngModelChange)="onCreatedAtChange(attr)" />
             🕒 Datum vytvoření
           </label>
           <label class="attr-flag-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="attr.visible"
-              [name]="'attr-visible-' + i"
-            />
+            <input type="checkbox" [(ngModel)]="attr.visible" [name]="'attr-visible-' + i" />
             👁️ Viditelný v tabulce
           </label>
+          @if (aresEnabled) {
+            <label class="attr-flag-label attr-flag-label--ares">
+              <input type="checkbox" [(ngModel)]="attr.isAresSource" [name]="'attr-aressource-' + i" (ngModelChange)="onAresSourceChange(attr)" />
+              🏢 Pole IČO
+            </label>
+          }
         </div>
 
         <div *cdkDragPlaceholder class="attribute-placeholder"></div>

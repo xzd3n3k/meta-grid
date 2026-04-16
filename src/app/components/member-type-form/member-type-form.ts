@@ -29,6 +29,7 @@ export class MemberTypeForm {
 
   protected name = '';
   protected attributes: MemberAttribute[] = [];
+  protected aresEnabled = false;
 
   protected isSelectType(attr: MemberAttribute): boolean {
     return attr.type === 'single-select' || attr.type === 'multi-select';
@@ -38,10 +39,13 @@ export class MemberTypeForm {
     const memberType = this.memberType();
     if (memberType) {
       this.name = memberType.name;
+      this.aresEnabled = memberType.aresEnabled ?? false;
       this.attributes = memberType.attributes.map(attr => ({
         ...attr,
         visible: attr.visible ?? true,
         options: attr.options ? [...attr.options] : [],
+        aresKey: attr.aresKey ?? '',
+        isAresSource: attr.isAresSource ?? false,
       }));
     }
   });
@@ -50,14 +54,18 @@ export class MemberTypeForm {
     const memberType = this.memberType();
     if (memberType) {
       this.name = memberType.name;
+      this.aresEnabled = memberType.aresEnabled ?? false;
       this.attributes = memberType.attributes.map(attr => ({
         ...attr,
         visible: attr.visible ?? true,
         options: attr.options ? [...attr.options] : [],
+        aresKey: attr.aresKey ?? '',
+        isAresSource: attr.isAresSource ?? false,
       }));
       return;
     }
     this.name = '';
+    this.aresEnabled = false;
     this.attributes = [];
   }
 
@@ -68,6 +76,8 @@ export class MemberTypeForm {
       type: 'text',
       visible: true,
       options: [],
+      aresKey: '',
+      isAresSource: false,
     });
   }
 
@@ -90,6 +100,7 @@ export class MemberTypeForm {
       this.attributes.forEach(a => { if (a.id !== attr.id) a.isAutoId = false; });
       attr.type = 'number';
       attr.isCreatedAt = false;
+      attr.isAresSource = false;
       if (!attr.name) attr.name = 'ID';
     }
   }
@@ -98,7 +109,18 @@ export class MemberTypeForm {
     if (attr.isCreatedAt) {
       this.attributes.forEach(a => { if (a.id !== attr.id) a.isCreatedAt = false; });
       attr.isAutoId = false;
+      attr.isAresSource = false;
       if (!attr.name) attr.name = 'Vytvořeno';
+    }
+  }
+
+  protected onAresSourceChange(attr: MemberAttribute) {
+    if (attr.isAresSource) {
+      this.attributes.forEach(a => { if (a.id !== attr.id) a.isAresSource = false; });
+      attr.isAutoId = false;
+      attr.isCreatedAt = false;
+      attr.aresKey = '';
+      if (!attr.name) attr.name = 'IČO';
     }
   }
 
@@ -120,12 +142,17 @@ export class MemberTypeForm {
       alert('Výběrové atributy musí mít alespoň jednu možnost!');
       return;
     }
+    if (this.aresEnabled && !this.attributes.find(a => a.isAresSource)) {
+      alert('Při aktivní integraci s ARESem musí být označeno jedno pole jako "Pole IČO".');
+      return;
+    }
 
     const memberTypeId = this.memberTypeId();
 
     const memberType: MemberTypeInit = {
       name: this.name,
       attributes: this.attributes,
+      aresEnabled: this.aresEnabled,
     };
 
     if (!memberTypeId) {
@@ -159,7 +186,6 @@ export class MemberTypeForm {
           if (attr.type === 'boolean') defaultValue = false;
           else if (attr.type === 'multi-select') defaultValue = [];
           else if (attr.type === 'single-select') defaultValue = '';
-
           if (defaultValue !== null || attr.type === 'single-select') {
             this.memberService.addAttributeToAllMembers(memberTypeId, attr.name, defaultValue).subscribe({
               error: err => console.error(err)

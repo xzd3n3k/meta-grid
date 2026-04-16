@@ -21,8 +21,10 @@ export interface MemberAttribute {
   type: 'text' | 'number' | 'date' | 'boolean' | 'single-select' | 'multi-select';
   isAutoId?: boolean;
   isCreatedAt?: boolean;
+  isAresSource?: boolean;
   options?: string[];
   visible?: boolean;
+  aresKey?: string;
 }
 
 export interface MemberType extends MemberTypeInit {
@@ -32,6 +34,7 @@ export interface MemberType extends MemberTypeInit {
 export interface MemberTypeInit {
   name: string;
   attributes: MemberAttribute[];
+  aresEnabled?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

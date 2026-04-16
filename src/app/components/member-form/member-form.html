@@ -16,18 +16,44 @@
       @for (attr of selectedType.attributes; track $index) {
         @if (!isAutoFilled(attr)) {
           <div>
-            @if (attr.type === 'multi-select') {
-              <!-- Multi-select: checkboxes without hxt-form-field wrapper -->
+
+            <!-- ARES zdrojové pole (IČO) s tlačítkem Vyplnit -->
+            @if (attr.isAresSource && hasAres) {
+              <hxt-form-field [label]="attr.name">
+                <div class="ares-input-row">
+                  <input
+                    type="text"
+                    [(ngModel)]="formData[attr.name]"
+                    [name]="attr.name"
+                    placeholder="např. 12345678"
+                    class="ares-ico-input"
+                  />
+                  <button
+                    type="button"
+                    (click)="fillFromAres()"
+                    [disabled]="aresLoading"
+                    class="ares-fill-btn"
+                  >
+                    @if (aresLoading) {
+                      <span class="ares-spinner">⏳</span> Načítám…
+                    } @else {
+                      🔍 Vyplnit z ARES
+                    }
+                  </button>
+                </div>
+              </hxt-form-field>
+              @if (aresError) {
+                <p class="ares-error">⚠️ {{ aresError }}</p>
+              }
+
+            <!-- Multi-select -->
+            } @else if (attr.type === 'multi-select') {
               <div class="multi-select-field">
                 <span class="multi-select-label">{{ attr.name }}</span>
                 <div class="multi-select-options">
                   @for (opt of attr.options || []; track opt) {
                     <label class="multi-select-option">
-                      <input
-                        type="checkbox"
-                        [checked]="isOptionSelected(attr.name, opt)"
-                        (change)="toggleOption(attr.name, opt, $event)"
-                      />
+                      <input type="checkbox" [checked]="isOptionSelected(attr.name, opt)" (change)="toggleOption(attr.name, opt, $event)" />
                       {{ opt }}
                     </label>
                   }
@@ -36,6 +62,8 @@
                   }
                 </div>
               </div>
+
+            <!-- Single-select -->
             } @else if (attr.type === 'single-select') {
               <hxt-form-field [label]="attr.name">
                 <select [(ngModel)]="formData[attr.name]" [name]="attr.name">
@@ -45,6 +73,8 @@
                   }
                 </select>
               </hxt-form-field>
+
+            <!-- Ostatní typy -->
             } @else if (attr.type === 'text') {
               <hxt-form-field [label]="attr.name">
                 <input type="text" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
@@ -62,6 +92,7 @@
                 <input type="checkbox" [(ngModel)]="formData[attr.name]" [name]="attr.name" />
               </hxt-form-field>
             }
+
           </div>
         }
       }
